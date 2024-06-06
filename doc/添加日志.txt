@@ -1,0 +1,19 @@
+日志添加-导航服务区列表
+	@Override
+    public void onUpdateSAPA(ArrayList<NaviFacility> arrayList) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("onUpdateSAPA:");
+        for (NaviFacility naviFacility : arrayList) {
+            if (naviFacility == null) {
+                continue;
+            }
+            stringBuilder.append("{name=").append(naviFacility.name)
+                    .append(",remainDist=").append(naviFacility.remainDist).append("}");
+        }
+        Logger.d(TAG, stringBuilder.toString());
+    }
+日志添加-导航服务区列表详情
+	@Override
+    public void onObtainSAPAInfo(SAPAInquireResponseData sapaInquireResponseData) {
+        Logger.d(TAG, "onObtainSAPAInfo:" + GsonUtils.toJson(sapaInquireResponseData));
+    }

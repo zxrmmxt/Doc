@@ -1,0 +1,682 @@
+导航引导卡片：
+R.layout.lt_fragment_auto_navi
+容器：LinearLayout mNaviInfoContainer = mMainView.findViewById(com.autonavi.amapauto.R.id.ct_navigation_info_container);
+BaseNaviView.mGuideInfoCard = new DriveNaviInfoView(mFragment.getActivity(), AbstractDriveCardManager.CardId.CARD_GUIDE_INFO);
+布局文件View view = getInflater(this).inflate(R.layout.lt_layout_navigation_info_next_auto_navi,this);
+根布局：mNaviInfoPanel = view.findViewById(R.id.cl_navigation_info_landscape);
+显示和隐藏：DriveNaviInfoView.show() DriveNaviInfoView.onPause()
+AbstractDriveCardManager.setGuideInfoCard(BaseDriveCardView guideInfoCard)
+AbstractDriveCardManager.mGuideInfoCard
+AbstractDriveCardManager.getGuideInfoCard()
+DriveNaviInfoView.mDriveGuideInfoHolder = new DriveGuideInfoHolder();
+DriveNaviInfoView.mDriveGuideInfoHolder.setTbtRootView(mNaviInfoPanel);
+DriveNaviInfoView.TbtRootView
+显示：DriveGuideInfoHolder.setTbtRootViewVisibility()
+
+显示卡片：DriverCardManager.showCard(final CardId cardId, Object... infos)
+DriverCardManager.curCard = cardCreated;
+CardId.CARD_GUIDE_INFO没有被赋值，判断卡片是否在显示，AbstractDriveCardManager.isCardShowing(BaseDriveCardView card)没有包含CardId.CARD_GUIDE_INFO卡片
+AbstractDriveCardManager.putCardRefToCachePool(Enum cardId, Object card)也没有将CardId.CARD_GUIDE_INFO卡片加入缓存
+
+卡片中控件：DriverCardManager.getDriveGuideInfoHolder() DriveGuideInfoHolder
+
+隐藏卡片：
+AbstractDriveCardManager.pauseCard(final BaseDriveCardView card)
+AbstractDriveCardManager.dismissCurCard(int type)
+
+
+路口大图卡片：DriveCrossView.mDriveGuideInfoHolder = new DriveGuideInfoHolder();
+
+卡片类型：
+public enum CardId {
+	//路口放大图
+	CARD_CROSS(301),
+
+	//三维实景
+	CARD_THREE_DIMENSION(340),
+
+	//停车场
+	CARD_PARKING(305),
+
+	//高速信息卡片
+	CARD_REST_INFO(310),
+
+	//躲避拥堵
+	CARD_AVOID_JAM(315),
+
+	//限行，禁行，封路
+	CARD_LIMIT_FORBIDDEN_OR_DAMAGE(316),
+
+	//油量提醒
+	CARD_GAS(325),
+
+	//电量提醒
+	CARD_BATTERY(330),
+
+	//电量不可达提醒
+	CARD_BATTERY_UNREACH(331),
+
+	//沿途搜
+	CARD_SEARCH(201),
+
+	//途径点，用户主动点击
+	CARD_VIA_USER(205),
+
+	//途经点，被动弹出
+	CARD_VIA_SILENT(320),
+
+	//交通事件，用户主动点击
+	CARD_TRAFFIC_DETAIL(210),
+
+	//交通事件，被动弹出
+	CARD_TRAFFIC_EVENT(335),
+
+	//目的地修改--组队需求
+	CARD_DESTION(300),
+
+
+	// 引导信息卡片
+	CARD_GUIDE_INFO(100),
+
+	//天气卡片;
+	CARD_WEATHER(333);
+
+
+
+	/** 类型定义区 */
+	private int value;
+	CardId(int value) {
+		this.value = value;
+	}
+
+	public int getValue() {
+		return value;
+	}
+}
+
+NaviView：lt_fragment_auto_navi.xml
+scl_navi:
+	cl_navi_normal_state：
+		sll_navi_btn：右下角按钮组
+		cl_ar_btn：ar导航按钮
+		sl_swith_hd：高精导航切换按钮
+		scl_theviewof：
+			cl_theviewof：全览按钮
+				siv_theviewof
+			siv_eagle_eye_map：鹰眼容器
+			siv_eagle_eye_north
+		casl_scale：左下角的比例尺刻度控件
+		ca_autologo：左下角的退出按钮上边的“高德地图”Logo
+		ct_artical_line_speed：光柱图的容器
+		stv_navi_continue：继续导航按钮
+		stv_road_name：当前道路路名
+		ct_second_info：停车场，天气卡片等容器 DriveParkingView.mContainerView
+		sll_navi_base_info：引导信息卡片区域
+			ct_navigation_info_container:导航信息卡片容器
+			tlv_traffic_lane：车道线
+			tslv_stations_lane：ETC通道
+		layout_locaion1：databinding
+		layout_locaion2：databinding
+		layout_locaion3：databinding
+		ll_speed_info：
+			sll_section_speed_test：
+				cs_speedwindow：速度图标，当前车速，沉浸态时出现，在导航信息卡片的右侧
+				sll_speed_test_contain：区间时速
+					SkinLinearLayout：
+						stv_text_heading_speed_discribe：当前车速值
+						stv_text_heading_speed：区间车速
+					SkinLinearLayout：剩余距离部分
+						stv_text_heading_distance_info：剩余距离值
+						stv_text_heading_distance_info_unit：剩余距离单位
+						stv_text_heading_distance：剩余距离prefix 剩余公里
+		ct_navi_poi_info_container：删除途经点卡片容器
+		ct_second_info_top：高速信息 DriveRestInfoView.mContainerView
+	table_quick_search：快捷搜索入口
+	ct_extras_container：“更多” 卡片容器[点击“更多”按钮时出现]
+	traffic_event_view:交通事件容器
+	slv_drive_report_container:驾驶行为报告[导航结束]容器
+	img_speed_over_caution:超速动画底图
+	stv_start_record:开始录制
+	stv_start_replay:回放录制
+sfl_ar:功能开发中
+lt_bottom_view：无效控件
+layoutLocaion5：databinding
+layoutLocaion4：databinding
+
+导航卡片 宽度736
+	DriveNaviInfoView：lt_layout_navigation_info_next_auto_navi.xml
+	根布局：
+		sll_navi_base_info：NaviView.sllBaseNaviInfo
+			ct_navigation_info_container:DriveNaviInfoView.mRootView
+				cl_navigation_info_landscape：DriveNaviInfoView.mNaviInfoPanel DriveGuideInfoHolder.mTbtRootView
+路口大图卡片 宽度736
+	DriveCrossView:lt_layout_auto_navi_road_enlarge_auto_navi.xml
+	根布局:
+		BaseView.mMainView
+			cl_auto_navi_road_enlarge:DriveCrossView.mViewEnlarge,DriveCrossView.mEnlargeRoot
+			
+	cl_auto_navi_road_enlarge：
+		cl_tbt：
+			ac_road_enlarge：
+				sfl_turn_by_turn_arrow：
+					siv_turn_by_turn_arrow：
+				stv_text_distance：
+				stv_text_distance_cn：
+				stv_text_meter：
+				stv_exit：
+				stv_text_enter_into：
+				stv_text_next_location：
+				stv_text_exit_location：
+				cl_next_road：
+					stv_text_next_tbt_distance：
+					siv_turn_icon：
+			cbl_navi_progress_bar：
+			siv_road_enlarge_rect_area：路口大图占位
+			sll_navi_info：
+		cl_road_name：
+			stv_luming：
+推荐停车场卡片 宽度736
+	DriveParkingView：lt_layout_auto_navi_info_panel_parking_auto_navi.xml
+	根布局：
+		ct_second_info：mContainerView 和sll_navi_base_info宽度一致
+			lt_layout_auto_navi_info_panel_parking_auto_navi：mParkingView
+高速信息卡片（包含区间测速）
+	DriveRestInfoView:lt_drive_restinfo_view.xml
+	根布局：
+		ct_second_info_top：mContainerView 宽度530
+			lt_drive_restinfo_view：mRestInfoView
+电量不可达提醒
+	DriveVehicleChargeView：没有显示过
+交通事件，被动弹出
+	CardId.CARD_TRAFFIC_EVENT:没有显示过
+目的地修改--组队需求 宽度736
+	DriveTeamCardView：lt_layout_auto_navi_info_panel_team_dest_navi.xml
+	CardId.CARD_DESTION:真正类型AbstractDriveCardManager.CardId.CARD_WEATHER
+	根布局：
+		ct_second_info：mContainerView
+			lt_layout_auto_navi_info_panel_team_dest_navi：mTeamView
+天气卡片 宽度736
+	DriveWeatherView：layout_auto_navi_info_panel_weather_auto_navi.xml
+	根布局：
+		ct_second_info：mContainerView 和sll_navi_base_info宽度一致
+			layout_auto_navi_info_panel_weather_auto_navi：mWeatherView
+用户点击途经点
+	AlongWayDetailView：lt_along_search_card_auto_navi.xml
+	根布局：
+		ct_navi_poi_info_container：BaseNaviView.mNaviPOIContainer,AlongWayDetailView.mDetailContainer
+			lt_along_search_card_auto_navi:mRootView
+
+代码获取尺寸：ResUtil.getDimension(int resId)
+
+代码设置卡片尺寸
+NaviView.showDriveReport
+	FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams((int) mContext.getResources().getDimension(R.dimen.auto_dimen2_660),
+			FrameLayout.LayoutParams.WRAP_CONTENT);
+	mDriveReportContainer.addView(tsvDriveReport, lp);
+
+NaviView.updateTbtCardScale
+	ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) sllBaseNaviInfo.getLayoutParams();
+	layoutParams.width = ResUtil.getDimension(isTheviewof ? R.dimen.auto_dimen2_390 : R.dimen.auto_dimen2_660);
+	sllBaseNaviInfo.setLayoutParams(layoutParams);	
+	
+	
+StyleJsonAnalysisUtil.getStyleBeanJson("vector_cross_style")
+StyleJsonAnalysisUtil.getStyleBeanJson("raster_image_style")
+
+路口大图计算宽高：EnlargeInfo.getRect()
+
+限速：ICruiseObserver.onUpdateElecCameraInfo
+
+
+交通事件容器：
+traffic_event_view
+	BaseSkinConstraintLayout.createSDKView()
+	ISDKUIView.setRootView(View view)
+	public TrafficEventDetailView createSDKView() {
+        return new TrafficEventDetailView(getContext());
+    }
+交通事件卡片布局：R.layout.lt_layout_route_traffic_panel_routecarresult
+	交通事件详情（有图片）
+	交通事件详情（无图片）、拥堵
+	禁行
+	通用->事件过期
+	通用->加载失败
+	通用->加载中
+	关闭按钮
+
+交通事件卡片：CloudEventDetailView、TrafficEventDetailView
+交通事件对应icon：AutoTools.getTrafficIconId(detail.layertag)
+GSubTraEventDetail.layertag
+
+
+语音设置3D车头朝上：VoiceFuncConst.OPERATION_VIEW_TRANS_3D_HEAD_UP = "VIEW_TRANS_3D_HEAD_UP";
+
+算路请求：naviPresenter: main__errorCallback|naviPresenter: main__callback|requestRoute requestIds =
+
+
+语音：executeVoiceReceiver: voiceTransModel.operation =
+语音打开路况：VoiceFuncConst.OPERATION_OPEN_TRAFFIC_INFO = "OPEN_TRAFFIC_INFO";
+语音3D车头朝上：VoiceFuncConst.OPERATION_VIEW_TRANS_3D_HEAD_UP = "VIEW_TRANS_3D_HEAD_UP";
+地图视角切换：com.autonavi.gbl.map.MapView.setMapMode(MapviewModeParam ModeParam, boolean bAnimation)
+导航不在前台：!ProcessLifecycleManager.getInstance().isInForeground() && !NaviStatusManager.getInstance().isMainVisible()
+拉起应用到前台：SwitchAppUtils.setTopApp(SdkApplicationUtils.getApplication());
+设置地图位置：MapView.setMapLeftTop(int left, int top)
+退回主图界面：BaseSearchPresenter.exitToMainFragment(AutoContext autoContext)
+自动比例尺：BizGuideRouteControl.openDynamicLevel(boolean bOpen, @DynamicLevelType1 int type)
+折叠高速卡片：DriveRestInfoView
+折叠高速数据：ArrayList<NaviFacility> arrayList
+展开高速卡片：NaviSapaInfoView-NaviSapaInfoAdapterV1
+高速列表数据：SAPAInquireResponseData
+设置车标模式：BizCarControl.setCarMode(@CarMode1 int carMode, boolean bUpdateStyle)
+设置地图模式：MapView.setMapMode(MapviewModeParam ModeParam, boolean bAnimation)    
+设置全览模式：BizCarControl.setPreviewMode(boolean bPreview)
+地图显示全览：MapView.showPreview(PreviewParam previewParam, boolean bAnimation, int time, int animationId)
+导航交通事件详情卡片：TrafficEventDetailView UIComponent.getInstance().showDriveTrafficEventDetailView
+云控事件详情卡片：CloudEventDetailView UIComponent.getInstance().showCloudEventDetailView
+路线上封路事件图层：BizRouteType.BizRouteTypeTrafficBlock
+路线外封路事件图层：BizRouteType.BizRouteTypeTrafficBlockOuter
+路线上交通事件图层：BizRouteType.BizRouteTypeTrafficEventTip
+绘制路线属性配置：new BizPathInfoAttrs(PathInfo mPathInfoLiteObj, BizRouteDrawCtrlAttrs mDrawAttsLiteObj)
+用户历史轨迹图层json配置："line_gps_track"
+地图手势监听：MapView.addGestureObserver(IMapGestureObserver pIMapGestureObserver)
+偏航重算：INaviObserver.onReroute(RouteOption var1)
+偏航状态：偏航状态指车标未按引导路线行驶，偏离了路线，通常偏航后引导会立刻发起onReroute(routeType=2)的偏航重算请求，但一些特殊情况下，如之前有连续3次以上的偏航，导致当前处于偏航抑制状态，或当前处于服务区内，处于服务区偏航抑制状态，则引导不会通知偏航重算。这种情况下，定位匹配信号就会一直处于偏航状态
+图元：所有图元继承于LayerItem
+基础图层：BaseLayer 栅格图图元：RasterImageLayerItem 栅格图图元：LayerItemRasterImageType  车标图元：NaviPointLayerItem 车标图元：LayerItemNaviCarType
+箭头图元：ArrowLayerItem 箭头图元：LayerItemArrowType
+路线图层：RouteLayer 路线图元：RouteLayerItem 路线图元：LayerItemPathType
+车标图层：LayerItemType.LayerItemNaviCarType   json配置文件字段名称car_eagle_normal  track_marker_id
+鹰眼地图车标：BizCarType.BizCarTypeEagleEye
+2D矢量放大路口图图层：VectorCrossLayer 2D矢量放大路口图图元VectorCrossLayerItem 矢量路口大图图元：LayerItemVectorCrossType
+展示用户收藏内容：BizUserControl.updateFavoriteMain(ArrayList<BizUserFavoritePoint> favoritePoints)
+保存路径信息：ExternalPathInfo externalPathInfo = new ExternalPathInfo();  关键字：doSave:
+路线规划界面：RouteResultMapView----开始导航按钮：mBtnStartNavi
+路线规划注册观察者：RouteService.addRouteResultObserver(IRouteResultObserver ob)
+路线规划注册天气观察者：RouteService.addRouteWeatherObserver(IRouteWeatherObserver ob)
+路线规划注册行中重算观察者：RouteService.addRerouteObserver(INaviRerouteObserver ob)
+路线规划注册动态运营服务区信息观察者：RouteService.addRouteServiceAreaObserver(IRouteServiceAreaObserver ob)
+导航注册观察者：GuideService.addNaviObserver(INaviObserver ob)
+导航播报注册观察者：GuideService.addSoundPlayObserver(ISoundPlayObserver ob)
+导航天气接口：INaviObserver.onShowNaviWeather(ArrayList<NaviWeatherInfo> list)
+车辆能源类型：CarConfig.getCarPowerType()
+导航引导卡片显示：DriveNaviInfoView.show()  DriveGuideInfoHolder.setTbtRootViewVisibility()
+导航引导卡片隐藏：DriveNaviInfoView.onPause()
+起终点连线显示：BizGuideRouteControl.setVisible(BizRouteType.BizRouteTypeStartEndLine, true);
+起终点连线图层，对应的type分别为：BizRouteTypeStartEndLine、BizRouteTypeStartEndPoint、BizRouteTypeStartEndLinePoint  前置接口为BizGuideRouteControl.setPathPoints(RoutePoints pathPoints)，调用该接口的时候会触发该图层
+会显示路线上所有图层：BizGuideRouteControl.setVisible(true)，默认隐藏起终点连线需要调用BizGuideRouteControl.setVisible(BizRouteType.BizRouteTypeStartEndLine, false);
+设置地图中心点：(IModuleMapService) ((AutoContext) SdkApplicationUtils.getApplication()).getAutoService(AutoContext.MODULE_SERVICE_BASEMAP).getMapView(SurfaceViewID.SurfaceViewIDMain).getOperatorPosture().setMapCentersetMapCenter(Coord3DDouble mapCenter);
+设置图元为焦点：BizControl.setFocus(long bizType, String strID, boolean bFocus)   BaseLayer.setFocus(String strID, boolean bFocus)
+全览：MapView.showPreview(PreviewParam previewParam, boolean bAnimation, int time, int animationId)
+搜索首页：SearchHomeView
+导航历史记录：SearchNaviRecoredAdapter
+搜索poi详情：SearchPoiDetailView
+是否导航成功结果处理：NaviPresenter.dealStartNaviResult.dealStartNaviResult(StartNaviResult naviResult)
+字体加粗：tv.getPaint().setFakeBoldText(true);
+获取MapView:MapService.getMapView(SurfaceViewID.transform2EngineID(surfaceViewID))
+设置地图位置：MapView.setMapLeftTop(int left, int top)
+设置路线是否多备选路线模式：RouteDrawStyle.mIsMultipleMode = true;
+设置路线是否是导航状态：RouteDrawStyle.mIsNavi = false;
+起点图元样式：point_route_start    point_layer_item_style
+LionApi发送停止导航状态：SyncBusEvent event = new SyncBusEvent(ModuleType.NAVI, NaviEvent.NAVI_STATUS);bundle.putInt(NaviKey.DATA, NaviValue.NaviStatus.STOP);bundle.putInt(NaviKey.TYPE, NaviValue.NaviStopType.MANUAL);
+导航保存路线信息：ExternalPathInfoUtils.bindListenPath();
+导航场景图层优先级：https://autosdk.amap.com/#/devcenter/devguide/v710/da8gi7
+导航场景图：https://autosdk.amap.com/#/devcenter/devguide/v710/gwm7g319b621apyb
+图元类型：LayerItemType
+路线转向箭头：BizRouteType.BizRouteTypeArrow
+终点旗子气泡：BizRouteType.BizRouteTypeEndPoint 图标PointLayerItemStyleBean.point_layer_item_style.normal_style.poi_marker_id = "lt_path_end_point";  样式名称point_route_end
+路径末梢扎点：BizRouteType.BizRouteTypeEndPathPoint   PointLayerItemStyleBean.point_layer_item_style.normal_style.poi_marker_id = "lt_route_end_path_point";   样式名称point_route_end_path
+图层样式设置：PrepareLayerStyleInnerImpl.getLayerStyle(BaseLayer layer, LayerItem layerItem, boolean forJava)
+行程轨迹样式设置：BizUserType.BizUserTypeGpsTrack  json配置样式名称 point_gps_track_start
+初始化系统类型：SystemAdapterUtil.initSystemProxy(int systemType)
+镁佳获取车型配置：MegaSystem.getCarConfigLevel()
+搜索服务化接口：IModuleSearchService
+多备选标签图层：由com.autonavi.gbl.layer.BizGuideRouteControl.updatePaths()触发   https://autosdk.amap.com/#/devcenter/devguide/v710/gwm7g319b621apyb&id=9c0e147eb2acb1554070ca46040b3ac2
+继续导航卡片：MessageCardView
+系统配置：car level: 
+方向图标：NaviInfo.NaviInfoData.get(NaviInfo.NaviInfoFlag).maneuverID;
+方向图标：ManeuverIconResponseData.ManeuverConfig.maneuverID
+方向图标：INaviObserver.onObtainManeuverIconData(ManeuverIconResponseData respData);ManeuverIconResponseData.requestConfig.maneuverID;
+方向图标：MapModel: [ (MapModel.java:708)#sendNaviInfoTo2Qnx ]ID_NAVI_INFO
+方向图标：2_lt_navi_240421_NaviController: main__====maneuverID =
+方向图标：2_lt_navi_240421_BaseNaviView: main__updateTurnIcon: maneuverID =
+方向图标：2_lt_navi_240421_BaseNaviPresenter: main__mCurNaviInfo.crossManeuverID =
+方向图标：2_lt_navi_240421_BaseNaviPresenter: main__mCurNaviInfo.NaviInfoData.maneuverID
+方向图标-发送请求在线图标：INaviObserver.onShowNaviManeuver(final ManeuverInfo info)
+发送广播给仪表：DoProtocolMethodUtil.broadcastInfo(DoProtocolMethodUtil.METHOD_SEND_NAVI_INFO, mCurNaviInfo);  ProtocolBroadCastSender.sendNaviInfo(Object info)
+LionApi发送导航信息给仪表：SyncBusEvent event = new SyncBusEvent(ModuleType.NAVI, com.lion.api.module.navi.NaviEvent.NAVI_DETAIL_INFO);
+LionApi发送出口信息给仪表：SyncBusEventSyncBusEvent event = new SyncBusEvent(ModuleType.NAVI, com.lion.api.module.navi.NaviEvent.NAVI_EXIT_DIRECTION_INFO);
+LionApi发送导航详细信息给仪表：SyncBusEvent event = new SyncBusEvent(ModuleType.NAVI, NaviEvent.NAVI_DETAIL_INFO);
+距离计算：NavigationUtil.formatDistanceArray(int distance)
+到下一个道路距离：NaviInfo.NaviInfoData.get(NaviInfo.NaviInfoFlag).segmentRemain.dist
+下一个道路名称：NaviInfo.NaviInfoData.get(NaviInfo.NaviInfoFlag).nextRouteName   NaviInfo.nextCrossInfo.get(0).nextRoadName
+路口大图距离终点距离：mCrossImageToEnd = naviInfo.routeRemain.dist - crossImageInfo.distance
+到路口大图距离：nDistanceNextRoad = (int) (naviInfo.routeRemain.dist - mCrossImageToEnd); nDistanceNextRoad = (int) crossImageInfo.distance;
+车道线：LaneInfo.optimalLane LaneInfo.backLane LaneInfo.frontLane
+巡航显示隐藏车道线：ICruiseObserver.onShowCruiseLaneInfo(LaneInfo info)  ICruiseObserver.onHideCruiseLaneInfo()
+显示键盘：KeyboardUtil.showKeyboard(View view)
+切换APP到后台：SwitchAppUtils.moveTaskToBack(mContext);
+出口编号：ExitDirectionInfo.exitNameInfo    ExitDirectionInfo.entranceExit+ExitDirectionInfo.exitNameInfo.get(0)
+出口方向：ExitDirectionInfo.directionInfo
+停止导航：GuideService.stopNavi(long id)
+返回手势：onKeyDown()  onBackPressed
+导航发送信号给外部：msg.what is
+导航分时车道线使用：backLaneType、frontLaneType：用于表示是否是公交/专用/潮汐/可变车道 仅在线导航有效    frontLane：用于表示是否可通行    
+搜索业务类型：SearchPoiBizType
+搜索查询类型：SearchQueryType
+地图触摸事件：MapGestureObserver.onMotionEvent(long l, int i, long l1, long l2)
+点击路线回调：itemType == LayerItemType.LayerItemPathType && businessType == BizRouteType.BizRouteTypePath
+是否是公交/专用/潮汐/可变车道：LaneInfo.backLaneType=1/2/3/4
+是否可行：LaneInfo.frontLane≠0xFF
+视口锚点：车标相对屏幕位置在AutoSDK的叫法为视口锚点
+疑难问题：
+http://10.177.8.11/browse/P11SC136-2278
+http://10.177.8.11/browse/P11SC124-3298
+http://10.177.8.11/browse/P11SC136-2271
+http://10.177.8.11/browse/P11SC136-2244
+http://10.177.8.11/browse/P11SC136-1741
+http://10.177.8.11/browse/P11SC136-1231
+http://10.177.8.11/browse/P11SC136-2290
+http://10.177.8.11/browse/P11SC136-1228
+http://10.177.8.11/browse/P11SC136-2305
+http://10.177.8.11/browse/P11SC136-2291
+http://10.177.8.11/browse/P11SC136-2601
+http://10.177.8.11/browse/P11SC136-2716
+http://10.177.8.15/c/Navigation/LTNavigationService/+/31890
+Androidstudio logcat过滤设置:
+包名过滤package:com.lion.appfwk.navi 日志等级过滤level:debug  Tag过滤tag:TAG  关键字过滤message:过滤的关键字 组合过滤  正则表达式过滤  时间过滤 
+自定义纹理：PrepareLayerStyleInner.getMarkerId(BaseLayer pLayer, LayerItem pItem, ItemStyleInfo itemStyleInfo) PrepareLayerStyleInner.getLayerStyle(BaseLayer layer, LayerItem item, boolean forJava)
+行驶轨迹起终点气泡自定义图片：LayerItem.getBusinessType() == BizUserType.BizUserTypeGpsTrack  GpsTrackPointLayerItem.getMGpsPointType() == BizGpsPointType.GPS_POINT_START || GpsTrackPointLayerItem.getMGpsPointType() == BizGpsPointType.GPS_POINT_END;
+BaseFragDialog透明背景设置:setStatusBarTextColor(getDialog().getWindow(), !DayStatusSystemUtil.getInstance().isNightMode());getDialog().getWindow().setBackgroundDrawableResource(R.color.transparent);
+android:windowNoTitle：
+android:windowIsFloating：
+android:windowBackground：
+android:windowFrame：
+android:backgroundDimEnabled：
+android:backgroundDimAmount：
+当前道路限速：INaviObserver.onCurrentRoadSpeed(int speed)
+通用控件样式：autoui res_theme
+停车场扎点：BizSearchType.BizSearchTypePoiParkRoute
+算路类型：PathResultData.type   RouteType.RouteTypeYaw;//偏航重算
+平行路-主辅路切换类型：ParalleType.paralleTypeMainSide
+平行路-桥上桥下切换类型：ParalleType.paralleTypeOverhead
+平行路-主辅路切换：PosService.switchParallelRoad(@LocSwitchRoadType1 int switchRoadType, BigInteger pstRoadID); 
+平行路-主路切辅路：LocSwitchRoadType.LocSwitchMainToSide 辅路切主路：LocSwitchRoadType.LocSwitchSideToMain
+平行路-桥上切桥下：LocSwitchRoadType.LocSwitchUpBridgeToDownBridge 桥下切桥上：LocSwitchRoadType.LocSwitchDownBridgeToUpBridge
+平行路-主辅路切换完成：IPosSwitchParallelRoadObserver.onSwitchParallelRoadFinished;
+平行路-主辅路算路类型：RouteType.RouteTypeParallelRoad
+平行路-主辅路更新：IPosParallelRoadObserver.onParallelRoadUpdate
+图层实时路况显示隐藏：MapControllerStatesType.MAP_CONTROLLER_ONOFF_TRAFFIC_STATE
+图层全量事件显示隐藏：OpenLayerID.OpenLayerIDRouteTraffic  9005：对应服务9000005=9000003+9000004全量事件
+矢量路口大图：itemType = LayerItemType.LayerItemVectorCrossType  businessType = BizRoadCrossType.BizRoadCrossTypeVector
+栅格路口大图：itemType = LayerItemType.LayerItemRasterImageType  businessType = BizRoadCrossType.BizRoadCrossTypeRasterImage
+动态改变路口大图样式：BizRoadCrossControl.updateStyle(CrossType.CrossTypeVector);
+车速超过电子眼限速，不播报超速：车速需满足以下条件才会播报超速/严重超速：大于限速值+3，播报超速，以80为例，车速需达83；大于限速值x1.5，播报严重超速，以80为例，车速需达120。
+添加业务图层控制点击观察者回调:void com.autonavi.gbl.layer.BizControl.addClickObserver(ILayerClickObserver pObserver)
+添加业务图层控制焦点变化观察者回调:void com.autonavi.gbl.layer.BizControl.addFocusChangeObserver(ILayerFocusChangeObserver pObserver)
+添加基础图层点击观察者回调:void com.autonavi.gbl.map.layer.BaseLayer.addClickObserver(ILayerClickObserver pObserver)
+添加基础图层焦点变化观察者回调:void com.autonavi.gbl.map.layer.BaseLayer.addFocusChangeObserver(ILayerFocusChangeObserver pObserver)
+添加飞线点击观察者回调:void com.autonavi.gbl.layer.BizFlyLineControl.addClickObserver(ILayerClickObserver pObserver)
+引导路线控制添加点击监听：BizGuideRouteControl.addClickObserver(ILayerClickObserver pObserver)
+区域控制添加点击监听：BizAreaControl.addClickObserver(ILayerClickObserver pObserver)
+标签控制添加点击监听：BizLabelControl.addClickObserver(ILayerClickObserver pObserver)
+图层点击回调接口:void com.autonavi.gbl.map.layer.observer.ILayerClickObserver.onNotifyClick(BaseLayer layer, LayerItem pItem, ClickViewIdInfo clickViewIds)
+图层焦点变化回调接口:void com.autonavi.gbl.map.layer.observer.ILayerFocusChangeObserver.onNotifyFocusChange(BaseLayer layer, LayerItem pItem, boolean isFocus)
+添加车标观察者回调:boolean com.autonavi.gbl.layer.BizCarControl.addCarObserver(ICarObserver pObserver)
+车标点击回调接口:void com.autonavi.gbl.map.layer.observer.ICarObserver.onCarClick(CarLoc carLoc)
+车标变更回调接口:void com.autonavi.gbl.map.layer.observer.ICarObserver.onCarLocChange(CarLoc carLoc)
+图面poi点点击回调接口：IMapviewObserver.onClickLabel(long engineId, ArrayList<MapLabelItem> pLabels)
+点击飞线终点图元：ILayerClickObserver.onNotifyClick(BaseLayer layer, LayerItem pItem, ClickViewIdInfo clickViewIds) PointLayerItem.getBusinessType()==BizFlyLineType.BizFlyLineTypePoint
+设置途经点不可点击：BizGuideRouteControl.setClickable(BizRouteType.BizRouteTypeViaPoint, false)
+设置路线外封路图层不可点击：BizGuideRouteControl.setClickable(BizRouteType.BizRouteTypeTrafficBlockOuter, false)
+点击-设置图层是否可点击：BizControl.setClickable(long bizType, boolean bClickable)
+图面手势移动回调接口:IMapGestureObserver.onMove(long engineId, long px, long py)
+图面双指捏合事件回调接口:IMapGestureObserver.onScaleRotateBegin(long l, long l1, long l2)
+图面单击手势回调接口:IMapGestureObserver.onSinglePress(long l, long l1, long l2, boolean b)
+图面长按：MapGestureObserver.onLongPress(long engineId, long px, long py)
+图面滑动:IMapGestureObserver.onSliding(long engineId, float velocityX, float velocityY)
+搜索多边形面图层:BizSearchType.BizSearchTypePoiEndAreaPolygon
+搜索多边形边线图层:BizSearchType.BizSearchTypePoiEndAreaPolyline
+搜索POI子节点图层:BizSearchType.BizSearchTypePoiChildPoint
+搜索POI父节点图层:BizSearchType.BizSearchTypePoiParentPoint
+搜索POI扎标图层:BizSearchType.BizSearchTypePoiLabel
+搜索POI中心点位置图层：BizSearchTypePoiCentralPos
+停车场POI图层：BizSearchType.BizSearchTypePoiParkRoute
+搜索充电桩图层：BizSearchType.BizSearchTypeChargeStation
+鹰眼搜索充电桩图层：BizSearchTypeEagleChargeStation
+搜索结果页：SearchResultMapFragment SearchResultMapParams
+搜索poi详情页:SearchPoiDetailFragment SearchPoiDetailParams
+扎点：LayerItemType.LayerItemPointType
+折叠高速卡片：INaviObserver.onUpdateSAPA(ArrayList<NaviFacility> serviceAreaList)
+展开高速详情卡片:INaviObserver.onObtainSAPAInfo(SAPAInquireResponseData sapaInquireResponseData)
+鹰眼地图普通模式路线类型：RouteLayerStyleType.EaglEye_Normal
+路线样式:IPrepareLayerStyle.getRouteLayerStyle(BaseLayer baseLayer, LayerItem layerItem, RouteLayerStyle routeLayerStyle)
+路线图层，item必须附加在Layer上：com.autonavi.gbl.map.layer.RoutePathLayer
+路线图元：com.autonavi.gbl.map.layer.RouteLayerItem
+路线图元类型：com.autonavi.gbl.map.layer.model.LayerItemType.LayerItemPathType
+路线图层样式：com.autonavi.gbl.map.layer.model.RouteLayerStyle
+路线样式参数：com.autonavi.gbl.map.layer.model.RouteLayerParam
+更新路口大图样式:BizRoadCrossControl.updateStyle(CrossType.CrossTypeVector)
+更新路口大图样式:BizRoadCrossControl.updateStyle(CrossType.CrossTypeGrid)
+Biz路口大图图层业务类型定义：com.autonavi.gbl.layer.model.BizRoadCrossType
+栅格路口大图图层：BizRoadCrossTypeRasterImage
+2D矢量路口大图图层：BizRoadCrossTypeVector
+3D精品大图图层：BizRoadCrossTypeRealCity
+清空路径样式缓存：BizGuideRouteControl.)
+充电站更新样式：BizSearchControl.updateStyle(BizSearchTypeChargeStation)
+停车场清空焦点：BizSearchControl.updateStyle(BizSearchTypePoiParkRoute)
+充电站清空焦点：BizSearchControl.clearFocus(BizSearchTypeChargeStation)
+途经点清空焦点：BizGuideRouteControl.clearFocus(BizRouteType.BizRouteTypeViaPoint)
+首次播报推荐停车场：NaviGuidePlayer.getInstance().play(ResUtil.getString(R.string.go_to_recommend_parking), true);
+讯飞播报：com.iflytek.autofly.tts.inner.ITtsManager.startSpeak(String var1, ITtsStatusListener var2)
+清除所有搜索结果：BizSearchControl.clearAllItems()
+路口大图选项配置：
+	Param crossParam = new Param();
+	crossParam.type = com.autonavi.gbl.guide.model.guidecontrol.Type.GuideParamCrossing;//放大图配置参数配置
+	crossParam.crossing.showRange = showRange;
+	crossParam.crossing.enable3D = true; //  三维总开关
+	crossParam.crossing.enableVectorImage = true; // 矢量图显示开
+	crossParam.crossing.enableGridImage = true; // 栅格图显示开关
+	crossParam.crossing.onlineRequest = true; // 设置置路口扩大图在线请求开关
+	crossParam.crossing.isMultiCross = true; // 是否一个路口支持多类型大图透出
+	crossParam.crossing.isDayForUseSet = isDay;//是否为白天模式
+是否离线：PathResultData.isLocal
+离线算路：mRouteCarResultData.setRouteConstrainCode(mRouteCarResultData.getRouteConstrainCode() | RouteConstrainCode.RouteCalcLocal);
+红绿灯启用禁用：BizRoadFacilityControl.enableTrafficSignalLight(isVisible)
+是否是多备选模式：RouteDrawStyle.mIsMultipleMode
+搜索：SearchServiceV2.keyWordSearchRqbxy(KeywordSearchRqbxyParam param, IKeyWordSearchObserverV2 observer, @SearchMode1 int mode, int taskid)
+搜索关键字：KeywordSearchRqbxyParam.keywords
+矩形：com.autonavi.gbl.common.model.RectDouble  RectDouble(double leftLiteObj, double rightLiteObj, double topLiteObj, double bottomLiteObj)
+路径矩形：BizGuideRouteControl.getPathResultBound(ArrayList<PathInfo> pathInfoList)
+起终点、途经点矩形：BizGuideRouteControl.getPathPointsBound(RoutePoints pathPoints)
+矩形：PreviewParam.mapBound
+停车场poi点矩形：RectUtils.getSearchAlongBound(List<POI> pois)
+路径矩形和停车场poi点矩形合并：RectUtils.rectUnion(RectDouble rectOrig, RectDouble rectOrig2)
+语音-说话：getSrIndex1 rawText|ProtocolReceiver intent:|ProtocolReceiver voiceData:|VoiceData answerText:|executeVoiceReceiver:|onPlayText:|onHiddenChanged hide
+语音-播报：NaviManager-onPlayTTS: str =|start speak:
+语音-播报：Protocol.APP_VOICE_MAP: main__ProtocolReceiver voiceData:
+语音-播报：SpeechState[0]: chatAction -----jsonResult=|SrManager[0]: onSrMessage() called with:|SrBusinessManager[0]: jsonObject is
+缩放：PointLayerItem.getScale().scale.poiScale
+缩放：PointLayerItem.getScale().scale.bgScale
+缩放：PointLayerItem.getScale().scale.bubbleScale
+代码设置view样式：LtDriveReportContainer(new ContextThemeWrapper(mContext, R.style.Lion_shadow));
+途经点气泡：BizRouteTypeViaPoint
+途经点气泡图层：BaseLayer viaPointLayer = BizGuideRouteControl.getRouteLayer(BizRouteType.BizRouteTypeViaPoint); BaseLayer.updateStyle();
+途经路ETA剩余电量图层：BaseLayer viaEtaLayer = BizGuideRouteControl.getRouteLayer(BizRouteType.BizRouteTypeViaETA); List<LayerItem> viaEtaItems = BaseLayer.getAllItems();BaseLayer.updateStyle();BizGuideRouteControl.showViaETAByIndex(int viaIndex)
+途径路小气泡：BizRouteType.BizRouteTypeViaPoint
+昵称：GSubTraEventDetail.nick
+主动作：CrossNaviInfo.mainAction
+近接动作：CrossNaviInfo.assistAction
+交通事件回调：ICallBackTrafficEventDetail.onRecvAck(GTrafficEventDetailResponseParam var1);
+三维实景：CrossType.CrossType3D
+：amap_so|fatal|eup     :|scudo   :|libc    :|crash_dump64:|tombstoned:|am_crash:|backtrace:|switch to crash|switch to system|switch to events|Zygote  :|libprocessgroup:|com.lion.appfwk.navi
+驶入备选路线：INaviObserver.onChangeNaviPath(long oldPathId, long pathID)
+BizGuideRouteControl.setSelectedPathIndex:需要调用updatePaths。这种方式会重新绘制路线，可能导致肉眼看到路线闪烁的问题。
+BizGuideRouteControl.switchSelectedPath:这种方式不会清除路线，而是重新获取样式，能减少清除所有路线并重绘在性能上的消耗以及路线闪烁的问题。
+驶入备选路：HMI在收到onChangeNaviPath接口回调后调用GuideService.setNaviPath设置引导路线，NaviPath.setType(RouteType.RouteTypeOnSelectMainPath)
+驶入备选路播报：详细播报/简洁播报有影响
+播报模式-详细：RouteService.control(RouteControlKey.RouteControlKeyPlayStyle, "2")
+播报模式-极简：RouteService.control(RouteControlKey.RouteControlKeyPlayStyle, "6")
+简洁模式播报：播报"出发"
+详细播报：播报"准备出发"
+高德播报："前方,畅通"
+主动查询前方路况：GuideService.playTRManual(int dist)   ISoundPlayObserver.onPlayTTS(SoundInfo pInfo)
+版本：InitSdkManagerV1:|gbl version|InitSdkManagerV1:|version name|InitSdkManagerV1:|version code
+组队终点：BizAGroupControl.setVisible(BizAGroupType.BizAGroupTypeEndPoint, boolean bVisible)
+起点、途经点、终点：PointType.PointTypeStart;PointType.PointTypeVia;PointType.PointTypeEnd;需要设置POIInfo.poiID
+偏航算路设置起点：POIForRequest.addPoint(PointType.PointTypeStart, startInfo);
+偏航算路设置终点：POIForRequest.addPoint(PointType.PointTypeEnd, endInfo);
+偏航算路设置途经点：POIForRequest.addPoint(PointType.PointTypeVia, viaInfo);
+偏航算路：NaviPath.setPoint(POIForRequest value)
+设置路线：NaviPath.setVecPaths(ArrayList<PathInfo> value)
+算路偏好：NaviPath.setStrategy(int value)
+算路类型：NaviPath.setType(int value)
+算路-请求：RouteService.requestRoute(RouteOption routeOption)
+续航：NaviPath.setScene(@SceneFlagType1 int value)
+设置导航线路：GuideService.setNaviPath(NaviPath naviPath)
+设置导航主线路：GuideService.selectMainPathID(long pathID)
+绘制-置灰：BizGuideRouteControl.setPassGreyMode(boolean bPassGrey);
+绘制-路径样式：BizGuideRouteControl.setPathDrawStyle(RouteDrawStyle drawParam);
+绘制-路径点：BizGuideRouteControl.setPathPoints(RoutePoints pathPoints);
+绘制-路径信息：BizGuideRouteControl.setPathInfos(ArrayList<BizPathInfoAttrs> pathInfo, int selectIndex);
+绘制-显示起点：BizGuideRouteControl.setVisible(BizRouteType.BizRouteTypeStartPoint, true)
+绘制-剩余电量隐藏：BizGuideRouteControl.setVisible(BizRouteType.BizRouteTypeEnergyRemainPoint, false)
+绘制-备选路线标签隐藏：BizGuideRouteControl.setVisible(BizRouteType.BizRouteTypeGuideLabel, false)
+绘制-收藏点隐藏：BizUserControl.setVisible(BizUserType.BizUserTypeFavoriteMain, false)
+绘制-车标隐藏：BizCarControl.setVisible(false)
+绘制-途经点隐藏：BizGuideRouteControl.setVisible(BizRouteType.BizRouteTypeViaPoint, false)
+绘制-清除收藏点：BizUserControl.clearAllItems(BizUserType.BizUserTypeFavoriteMain)
+绘制-显示收藏点：BizUserControl.setVisible(BizUserType.BizUserTypeFavoriteMain, boolean bVisible)
+绘制-清除GPS轨迹：BizUserControl.clearAllItems(BizUserType.BizUserTypeGpsTrack);
+绘制-清除GPS轨迹：BizUserControl.clearAllItems(BizUserType.BizUserTypeGpsTrackLine);
+绘制-获取途经点图层：BizGuideRouteControl.getRouteLayer(BizRouteType.BizRouteTypeViaPoint)
+绘制-红绿灯显示隐藏：BizRoadFacilityControl.setVisible(BizRoadFacilityType.BizRoadFacilityTypeGuideTrafficSignalLight, isVisible)
+绘制-更新路径：BizGuideRouteControl.updatePaths()
+绘制-更新路径箭头：BizGuideRouteControl.updatePathArrow()
+绘制-显示所有：BizGuideRouteControl.setVisible(boolean bVisible)
+绘制-隐藏起终点连线：BizGuideRouteControl.setVisible(BizRouteType.BizRouteTypeStartEndLine, false)
+绘制-控制器基类：BizControl
+绘制-绘制路线时序：SetPathInfos → clearpaths → UpdatePaths → UpdatePathArrow
+绘制-鹰眼-是否已初始化：BizGuideEagleEyeControl.isInitialized()
+绘制-鹰眼-初始化：BizGuideEagleEyeControl.init(EagleEyeStyle style, IPrepareLayerStyle layerStyle)
+绘制-鹰眼-隐藏：BizGuideEagleEyeControl.setVisible(false)
+绘制-鹰眼-更新宽高：BizGuideEagleEyeControl.updateMapViewPort(MapViewPortParam portParam)
+绘制-鹰眼-隐藏途经点充电站：BizGuideEagleEyeControl.getBaseLayer(BizRouteType.BizRouteTypeEagleViaChargeStationPoint).setVisible(false)
+绘制-鹰眼-置灰：BizGuideEagleEyeControl.setPassGreyMode(true)
+绘制-鹰眼-路线：BizGuideEagleEyeControl.drawPath(RouteDrawStyle style)
+绘制-鹰眼-更新参数：BizGuideEagleEyeControl.updateEagleEyeParam(EagleEyeParam param)
+绘制-鹰眼-白天黑夜模式：BizGuideEagleEyeControl.updateStyle(boolean isNightMode)
+绘制-鹰眼-白天黑夜模式：EagleEyeStyle.isNightMode = NightModeGlobal.isNightMode();
+绘制-鹰眼-更新路径：BizGuideEagleEyeControl.updatePaths()
+绘制-鹰眼-设置鹰眼全览：BizControlService.setBizMode(@MapEngineID1 int engineId, @BizMode1 int bizMode)
+绘制-扎点-服务区：BizRouteType.BizRouteTypeRestArea
+绘制-扎点-清除服务区扎点：BizGuideRouteControl.clearAllItems(BizRouteType.BizRouteTypeRestArea);
+绘制-扎点-添加服务区扎点：BizGuideRouteControl.updateRouteRestAreaInfo(ArrayList<BizRouteRestAreaInfo> restAreaInfos)
+绘制-扎点-添加途经点：POIForRequest.addPoint(PointType.PointTypeVia, viaInfo);
+绘制-扎点-添加途经点：RoutePoints.mViaPoints
+绘制-终点区域-终点区域样式更新:BizAreaControl.updateStyle()
+绘制-终点区域-清空终点区域:BizAreaControl.clearRouteEndArea(RouteEndAreaType.RouteEndAreaTypeAll)
+绘制-终点区域-绘制终点区域高亮:BizAreaControl.updateRouteEndAreas(BizRouteEndAreasInfo endAreasInfo, RectInt previewRect)
+绘制-终点区域-清除终点区域子点扎标信息:BizLabelControl.clearAllItems(BizLabelType.BizLabelTypeRoutePopEndArea)
+绘制-终点区域-父节点图层：BizAreaControl.getAreaLayer(BizAreaType.BizAreaTypeEndAreaParentPoint).setVisible(visible);
+绘制-红绿灯：切换离线，需要主动调用BizRoadFacilityControl::clearAllitems()把红绿灯状态图层清除掉
+图层-获取搜索具体业务图层：BaseLayer com.autonavi.gbl.layer.BizSearchControl.getSearchLayer(@BizSearchType.BizSearchType1 int eType)
+图层-搜索线图层业务：void com.autonavi.gbl.layer.BizSearchControl.updateSearchLine(ArrayList< BizLineBusinessInfo > vecLineInfo)
+图层-搜索区域图层业务，单区域面：void com.autonavi.gbl.layer.BizSearchControl.updateSearchPolygon(BizPolygonBusinessInfo polygonInfo)
+图层-搜索区域图层业务，多区域面：void com.autonavi.gbl.layer.BizSearchControl.updateSearchPolygon(ArrayList< BizPolygonBusinessInfo > polygonInfo)	
+图层-搜索POI父点图层业务：boolean com.autonavi.gbl.layer.BizSearchControl.updateSearchParentPoi(ArrayList< BizSearchParentPoint > pointList)
+图层-搜索POI子节点图层业务：boolean com.autonavi.gbl.layer.BizSearchControl.updateSearchChildPoi(ArrayList< BizSearchChildPoint > pointList)
+图层-搜索POI中心点图层业务：boolean com.autonavi.gbl.layer.BizSearchControl.updateSearchCentralPoi(ArrayList< BizPointBusinessInfo > pointList)
+图层-搜索POI出入口图层业务：boolean com.autonavi.gbl.layer.BizSearchControl.updateSearchExitEntrancePoi(ArrayList< BizSearchExitEntrancePoint > pointList)
+图层-搜索POI起点、终点、途经点图层业务：boolean com.autonavi.gbl.layer.BizSearchControl.updateSearchBeginEndPoi(ArrayList< BizSearchBeginEndPoint > pointList)
+图层-沿途搜索图层业务：boolean com.autonavi.gbl.layer.BizSearchControl.updateSearchAlongRoutePoi(ArrayList< BizSearchAlongWayPoint > pointList)
+图层-沿途搜索气泡图层业务：boolean com.autonavi.gbl.layer.BizSearchControl.updateSearchAlongRoutePoiPop(ArrayList< BizSearchAlongWayPoint > pointList)
+图层-停车场图层业务：boolean com.autonavi.gbl.layer.BizSearchControl.updateSearchParkPoi(ArrayList< BizPointBusinessInfo > pointList)
+图层-POI扎标图层业务：boolean com.autonavi.gbl.layer.BizSearchControl.updateSearchPoiLabel(BizPointBusinessInfo labelInfo)
+图层-充电桩扎标图层业务：boolean com.autonavi.gbl.layer.BizSearchControl.updateSearchChargeStation(ArrayList< BizSearchChargeStationInfo > pointList)
+图层-转换搜索POI结果为深度信息JSON字符串, 内部自动识别POI类型并转换：String BizLayerUtil.convertSearchPoiDeepInfoToJson(SearchPoiInfo poiInfo);
+搜索：SearchMapHelper: [updateSelectPointAndArea2](332)tSelectPoi is :
+搜索：SearchResultMapPresenter: [onItemSelectPlanRoute](2083)go to plan:
+搜索-沿途搜深度信息入参：SearchLineDeepInfoParam.queryType;LineDeepQueryType;SearchLineDeepInfoParam.poiIds
+搜索-沿途批量深度信息搜索：SearchService.lineDeepInfoSearch(SearchLineDeepInfoParam param, IGSearchLineDeepInfoObserver observer, @SearchMode1 int mode, int taskid)
+搜索-深度信息搜索：SearchService.deepInfoSearch(SearchDeepInfoParam param, IGSearchDeepInfoObserver observer, @SearchMode1 int mode, int taskid)
+搜索-沿途批量深度信息搜索返回数据:LinePoiBase;
+搜索-深度信息服务区子节点数据:SearchLineDeepInfoResult.data.get(0).children
+搜索-深度信息品牌数据:SearchLineDeepInfoResult.data.get(0).brand
+搜索-沿途批量深度信息搜索：沿途批量深度信息搜索的前提条件，需要先进行沿途搜索，通过沿途搜索获取到需要查询深度信息的POIID列表。沿途批量深度信息搜索提升沿途搜查看信息时，对于深度信息的获取效率，协助用户更快完成出行决策。
+搜索-搜索类型分为：关键字搜索、周边搜索、沿途搜索、框选搜索、预搜索、IDQ搜索、深度信息搜索、沿途批量深度信息搜索、逆地理信息搜索、子到达点搜索
+路线规划：2_lt_navi_240421_RouteRequestController: main__startInfo =
+定位：VaPaas_AMapLocationManager: aMapLocationListener$lambda-4(AMapLocationManager.kt:39)高德定位回调:
+定位：VaPaas_LocationManager: choosePoi(LocationManager.kt:320)Choose AMap. aMapPoi:
+定位：VaPaas_LocationManager: choosePoi(LocationManager.kt:323)the currentPoi is :
+定位：VaPaas_LocationManager: save(LocationManager.kt:352)save poiData=PoiData
+定位：VaPaas_LocationManager: getLocation(LocationManager.kt:163)Take from memory:PoiData
+定位：SCENE-RetrofitLog: retrofitBack = [
+环岛：NaviInfo.ringOutCnt;
+高频日志：ServiceMgr.switchLog(ALCLogLevel.LogLevelDebug);
+比例尺：MapView.getOperatorPosture().setZoomLevel.setZoomLevel(float scale)
+比例尺-放大：MapView.getOperatorPosture().mapZoomIn(boolean bAnimation, boolean bSync)
+比例尺-缩小：MapView.getOperatorPosture().mapZoomOut(boolean bAnimation, boolean bSync)
+adb命令-卸载：adb uninstall com.lion.appfwk.navi
+adb命令-卸载：adb uninstall com.autonavi.amapauto.autohelper
+adb命令-杀导航进程：adb shell am force-stop "com.lion.appfwk.navi"
+adb命令-杀语音助手进程：adb shell am force-stop "com.desaysv.voicezone"
+adb命令-日志输出：adb logcat -v time > log.txt
+adb命令-autohelper后台被杀：adb shell pm uninstall --user 0 com.mega.healthmanager  
+adb命令-autohelper悬浮窗权限：adb shell settings put global app_ops_override_packages com.autonavi.amapauto.autohelper 1
+adb命令-autohelper悬浮窗权限：adb shell pm grant com.autonavi.amapauto.autohelper android.permission.SYSTEM_ALERT_WINDOW
+adb命令-autohelper授予网络权限：adb shell pm grant com.autonavi.amapauto.autohelper android.permission.INTERNET
+adb命令-清缓存：adb shell pm clear com.lion.appfwk.navi
+adb命令-白天黑夜模式：adb shell su 0 cmd uimode night no/adb shell su 0 cmd uimode night yes
+历史记录-搜索历史:UserTrackService.getSearchHistory()
+历史记录-添加搜索历史:UserTrackService.addSearchHistory(SearchHistoryItem item, @SyncMode1 int mode)
+历史记录-历史路径:UserTrackService.getHistoryRoute()
+历史记录-添加历史路径:UserTrackService.addHistoryRoute(HistoryRouteItem item, @SyncMode1 int mode)
+历史记录-启动GPS跟踪:UserTrackService.startGpsTrack(String psSavePath, String psFileName, long un32MsecRate)
+历史记录-关闭GPS跟踪:UserTrackService.closeGpsTrack(String psSavePath, String psFileName)
+历史记录-同步轨迹数据:UserTrackService.setBehaviorData(BehaviorDataType.BehaviorTypeTrailDriveForAuto, trailDriveDataId, data, SyncMode.SyncModeNow)
+POI:Points of interest
+AOI:area of interest
+日志关键字-引导信息日志：I/AmapAutoAdapter( 2197): run: Speed Limit:-1 ,mAmapAutoGuideInfo:AmapAutoGuideInfoBean{curRoadName='G6京藏高速', nextRoadName='null', cameraType=0, currentRoadType=0, routeRemainDis=107314, routeRemainTime=4742, vehicleDirection=0, speedLimit=0, naviArrow=10, roundAllNum=0, roundAboutNum=0, segRemainDis=534, segRemainTime=21, routeAllDis=111181, routeAllTime=4920, arrivalTime=null, routeRemainTime_String='1小时19分钟', eTA='18:10', routeRemainDis_auto='null', routeRemainTime_auto='null', nextRoadProgressPrecent='-1', intersectionZoomStatus='0'}
+日志关键字-LionApi日志-：I/LionLog ( 5424): [NaviDataRepository] ==> #syncBusListener syncBusEvent == SyncBusEvent{mModuleType=1, mEventName=11002, mBundle=Bundle[mParcelledData.dataSize=676]}
+日志关键字-服务区信息：updateRestInfo
+日志关键字-导航终点：endPoiInfo|naviPos
+日志关键字-导航当前定位：onLocationChanged: location|GpsManagerImpl: LocationChange  GPS|the currentPoi is : PoiData|GPS Location = Location
+两点之间距离：BizLayerUtil.calcDistanceBetweenPoints(Coord2DDouble startP, Coord2DDouble endP)
+高德SDK文件：/sdcard/Android/data/com.lion.appfwk.navi/files/AutoSdkData
+电子眼-更新区间测试电子眼动态实时信息：INaviObserver.onUpdateIntervalCameraDynamicInfo.onUpdateIntervalCameraDynamicInfo(ArrayList<NaviIntervalCameraDynamicInfo> cameraDynamicList)
+电子眼-显示电子眼信息（包括区间测速电子眼）：INaviObserver.onShowNaviCameraExt(ArrayList<NaviCameraExt> naviCameraList)
+视窗模式：Fragment.onMultiWindowModeChanged(boolean isInMultiWindowMode)
+黑夜白天模式-鹰眼：MapView.getOperatorStyle().setMapStyle(MapStyleParam styleParam, boolean bRepeat)
+
+
+
+导航中偏航抑制逻辑
+解决方案：
+相关接口
+void com.autonavi.gbl.guide.observer.INaviObserver.onReroute(RouteOption
+rerouteOption)
+普通偏航抑制
+偏航抑制只发生在连续偏航的情况下，引擎会逐渐增大onReroute通知偏航的时间间隔，这是正常的业务逻辑，条件和逻辑如下：
+必要条件：连续偏航且每次偏航在原路径上行驶不超过10s
+延迟时间：
+第一次、第二次发生偏航马上回调，不延迟（注意首次偏离原路线的偏航重算不包括在这两次内）
+第三次发生偏航，延时15s
+第四次发生偏航，延时30s
+第五次及之后发生偏航，都延时60s
+3) 计数清零：只要在原路径上行驶超过10s则计数清零
+
+
+
+服务区偏航抑制
+
+
+服务区一定范围内即使实车偏离路线也不会触发偏航。clearPathsCacheStyle
+车标样式切换:BizCarControl.updateStyle()
+终点区域样式更新:BizAreaControl.updateStyle()
+清空终点区域:BizAreaControl.clearRouteEndArea(RouteEndAreaType.RouteEndAreaTypeAll)
+绘制终点区域高亮:BizAreaControl.updateRouteEndAreas(BizRouteEndAreasInfo endAreasInfo, RectInt previewRect)
+清除终点区域子点扎标信息:BizLabelControl.clearAllItems(BizLabelType.BizLabelTypeRoutePopEndArea)
+清空路线:BizGuideRouteControl.clearPaths()
+停车场扎点焦点：BizSearchControl.setFocus(BizSearchTypePoiParkRoute, String.valueOf(index), true)
+充电站扎点焦点：BizSearchControl.setFocus(BizSearchTypeChargeStation, String.valueOf(index), true)
+停车场更新样式：BizSearchControl.updateStyle(BizSearchTypePoiParkRoute
