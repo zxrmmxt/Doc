@@ -641,6 +641,7 @@ AOI:area of interest
 日志关键字-服务区信息：updateRestInfo
 日志关键字-导航终点：endPoiInfo|naviPos
 日志关键字-导航当前定位：onLocationChanged: location|GpsManagerImpl: LocationChange  GPS|the currentPoi is : PoiData|GPS Location = Location
+日志关键字-仪表车速：I/525_lt_navi_240530_LowFreqLogger(19465): 1003, 1717655599, altitude: 23.0, lon,lat is: 119.01097138888889,32.1523675, time: 1717655599187, speed: 38.71844, provider: gps
 两点之间距离：BizLayerUtil.calcDistanceBetweenPoints(Coord2DDouble startP, Coord2DDouble endP)
 高德SDK文件：/sdcard/Android/data/com.lion.appfwk.navi/files/AutoSdkData
 电子眼-更新区间测试电子眼动态实时信息：INaviObserver.onUpdateIntervalCameraDynamicInfo.onUpdateIntervalCameraDynamicInfo(ArrayList<NaviIntervalCameraDynamicInfo> cameraDynamicList)
