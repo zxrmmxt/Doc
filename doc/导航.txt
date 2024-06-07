@@ -576,7 +576,11 @@ BizGuideRouteControl.switchSelectedPath:这种方式不会清除路线，而是�
 绘制-终点区域-终点区域样式更新:BizAreaControl.updateStyle()
 绘制-终点区域-清空终点区域:BizAreaControl.clearRouteEndArea(RouteEndAreaType.RouteEndAreaTypeAll)
 绘制-终点区域-绘制终点区域高亮:BizAreaControl.updateRouteEndAreas(BizRouteEndAreasInfo endAreasInfo, RectInt previewRect)
-绘制-终点区域-清除终点区域子点扎标信息:BizLabelControl.clearAllItems(BizLabelType.BizLabelTypeRoutePopEndArea)
+绘制-终点区域-更新终点区域Tip:BizLabelControl.updatePopEndAreaPointBoxInfo(ArrayList<BizPopPointBusinessInfo> pointList)
+绘制-终点区域-清除终点区域Tip:BizLabelControl.clearAllItems(BizLabelType.BizLabelTypeRoutePopEndArea)
+绘制-终点区域-清除子扎点焦点：BizAreaControl.clearFocus(BizAreaType.BizAreaTypeEndAreaChildPoint);
+绘制-终点区域-点击子扎点：BizAreaType.BizAreaTypeEndAreaChildPoint  会显示终点区域Tip
+绘制-终点区域-点击终点区域Tip：BizLabelType.BizLabelTypeRoutePopEndArea
 绘制-终点区域-父节点图层：BizAreaControl.getAreaLayer(BizAreaType.BizAreaTypeEndAreaParentPoint).setVisible(visible);
 绘制-红绿灯：切换离线，需要主动调用BizRoadFacilityControl::clearAllitems()把红绿灯状态图层清除掉
 图层-获取搜索具体业务图层：BaseLayer com.autonavi.gbl.layer.BizSearchControl.getSearchLayer(@BizSearchType.BizSearchType1 int eType)
