@@ -461,11 +461,6 @@ Biz路口大图图层业务类型定义：com.autonavi.gbl.layer.model.BizRoadCr
 栅格路口大图图层：BizRoadCrossTypeRasterImage
 2D矢量路口大图图层：BizRoadCrossTypeVector
 3D精品大图图层：BizRoadCrossTypeRealCity
-清空路径样式缓存：BizGuideRouteControl.)
-充电站更新样式：BizSearchControl.updateStyle(BizSearchTypeChargeStation)
-停车场清空焦点：BizSearchControl.updateStyle(BizSearchTypePoiParkRoute)
-充电站清空焦点：BizSearchControl.clearFocus(BizSearchTypeChargeStation)
-途经点清空焦点：BizGuideRouteControl.clearFocus(BizRouteType.BizRouteTypeViaPoint)
 首次播报推荐停车场：NaviGuidePlayer.getInstance().play(ResUtil.getString(R.string.go_to_recommend_parking), true);
 讯飞播报：com.iflytek.autofly.tts.inner.ITtsManager.startSpeak(String var1, ITtsStatusListener var2)
 清除所有搜索结果：BizSearchControl.clearAllItems()
@@ -534,6 +529,11 @@ BizGuideRouteControl.switchSelectedPath:这种方式不会清除路线，而是�
 续航：NaviPath.setScene(@SceneFlagType1 int value)
 设置导航线路：GuideService.setNaviPath(NaviPath naviPath)
 设置导航主线路：GuideService.selectMainPathID(long pathID)
+绘制-清空路径样式缓存：BizGuideRouteControl.clearPathsCacheStyle 如果路线的样式信息发生变化，需要重新获取，则需要调用BizGuideRouteControl.clearPathsCacheStyle。后面调用updatePaths或updateStyle就会重新向HMI获取路线的样式信息。如何开启路线样式缓存功能，减少重复获取路线样式:重写IPrepareLayerStyle::isRouteCacheStyleEnabled返回true，同时isRouteStyleNightMode根据上层昼夜模式情景，返回当前是否是黑夜模式。这样就启用了路线样式缓存功能，某个device的engineId以及昼夜下对应的路线样式已经获取过，则不再从上层再次获取。另外，如果路线样式需要改变，则调用IBizGuideRouteControl::clearPathsCacheStyle清除已经缓存的数据，那么下次需要路线样式的时候，会再次向上层重新获取。
+绘制-充电站更新样式：BizSearchControl.updateStyle(BizSearchTypeChargeStation)
+绘制-停车场清空焦点：BizSearchControl.updateStyle(BizSearchTypePoiParkRoute)
+绘制-充电站清空焦点：BizSearchControl.clearFocus(BizSearchTypeChargeStation)
+绘制-途经点清空焦点：BizGuideRouteControl.clearFocus(BizRouteType.BizRouteTypeViaPoint)
 绘制-置灰：BizGuideRouteControl.setPassGreyMode(boolean bPassGrey);
 绘制-路径样式：BizGuideRouteControl.setPathDrawStyle(RouteDrawStyle drawParam);
 绘制-路径点：BizGuideRouteControl.setPathPoints(RoutePoints pathPoints);
