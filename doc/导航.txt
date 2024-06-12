@@ -653,7 +653,8 @@ AOI:area of interest
 电子眼-显示电子眼信息（包括区间测速电子眼）：INaviObserver.onShowNaviCameraExt(ArrayList<NaviCameraExt> naviCameraList)
 视窗模式：Fragment.onMultiWindowModeChanged(boolean isInMultiWindowMode)
 黑夜白天模式-鹰眼：MapView.getOperatorStyle().setMapStyle(MapStyleParam styleParam, boolean bRepeat)
-
+git命令-push：git push origin HEAD:refs/for/分支名
+git命令-github push：git push origin master
 
 
 导航中偏航抑制逻辑
