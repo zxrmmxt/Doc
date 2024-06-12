@@ -631,6 +631,7 @@ adb命令-autohelper悬浮窗权限：adb shell pm grant com.autonavi.amapauto.a
 adb命令-autohelper授予网络权限：adb shell pm grant com.autonavi.amapauto.autohelper android.permission.INTERNET
 adb命令-清缓存：adb shell pm clear com.lion.appfwk.navi
 adb命令-白天黑夜模式：adb shell su 0 cmd uimode night no/adb shell su 0 cmd uimode night yes
+adb命令-install失败：adb shell;cd /product/app/LionNavi/;rm -rf LionNavi.apk;setprop persist.sv.enable_adb_install 1;
 历史记录-搜索历史:UserTrackService.getSearchHistory()
 历史记录-添加搜索历史:UserTrackService.addSearchHistory(SearchHistoryItem item, @SyncMode1 int mode)
 历史记录-历史路径:UserTrackService.getHistoryRoute()
