@@ -405,6 +405,7 @@ android:backgroundDimAmount：
 平行路-主辅路切换完成：IPosSwitchParallelRoadObserver.onSwitchParallelRoadFinished;
 平行路-主辅路算路类型：RouteType.RouteTypeParallelRoad
 平行路-主辅路更新：IPosParallelRoadObserver.onParallelRoadUpdate
+平行路-主辅路切换关键字：onParallelWayClick execute|updateParallelRoad:mParallelRoadState|updateParallelRoad:road state not changed
 图层实时路况显示隐藏：MapControllerStatesType.MAP_CONTROLLER_ONOFF_TRAFFIC_STATE
 图层全量事件显示隐藏：OpenLayerID.OpenLayerIDRouteTraffic  9005：对应服务9000005=9000003+9000004全量事件
 矢量路口大图：itemType = LayerItemType.LayerItemVectorCrossType  businessType = BizRoadCrossType.BizRoadCrossTypeVector
