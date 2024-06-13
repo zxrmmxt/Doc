@@ -584,6 +584,7 @@ BizGuideRouteControl.switchSelectedPath:这种方式不会清除路线，而是�
 绘制-终点区域-点击终点区域Tip：BizLabelType.BizLabelTypeRoutePopEndArea
 绘制-终点区域-父节点图层：BizAreaControl.getAreaLayer(BizAreaType.BizAreaTypeEndAreaParentPoint).setVisible(visible);
 绘制-红绿灯：切换离线，需要主动调用BizRoadFacilityControl::clearAllitems()把红绿灯状态图层清除掉
+绘制-自定义纹理：ByteBuffer dataBuffer = ByteBuffer.allocate(dynamicBitmap.getByteCount());dynamicBitmap.copyPixelsToBuffer(dataBuffer);LayerTexture layerTexture = new LayerTexture();layerTexture.dataBuff = new BinaryStream(dataBuffer.array());layerTexture.width = dynamicBitmap.getWidth();layerTexture.height = dynamicBitmap.getHeight();layerTexture.iconType = LayerIconTypeBMP;dataBuffer.clear();
 图层-获取搜索具体业务图层：BaseLayer com.autonavi.gbl.layer.BizSearchControl.getSearchLayer(@BizSearchType.BizSearchType1 int eType)
 图层-搜索线图层业务：void com.autonavi.gbl.layer.BizSearchControl.updateSearchLine(ArrayList< BizLineBusinessInfo > vecLineInfo)
 图层-搜索区域图层业务，单区域面：void com.autonavi.gbl.layer.BizSearchControl.updateSearchPolygon(BizPolygonBusinessInfo polygonInfo)
