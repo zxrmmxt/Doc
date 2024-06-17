@@ -585,6 +585,7 @@ BizGuideRouteControl.switchSelectedPath:这种方式不会清除路线，而是�
 绘制-终点区域-父节点图层：BizAreaControl.getAreaLayer(BizAreaType.BizAreaTypeEndAreaParentPoint).setVisible(visible);
 绘制-红绿灯：切换离线，需要主动调用BizRoadFacilityControl::clearAllitems()把红绿灯状态图层清除掉
 绘制-自定义纹理：ByteBuffer dataBuffer = ByteBuffer.allocate(dynamicBitmap.getByteCount());dynamicBitmap.copyPixelsToBuffer(dataBuffer);LayerTexture layerTexture = new LayerTexture();layerTexture.dataBuff = new BinaryStream(dataBuffer.array());layerTexture.width = dynamicBitmap.getWidth();layerTexture.height = dynamicBitmap.getHeight();layerTexture.iconType = LayerIconTypeBMP;dataBuffer.clear();
+绘制-搜索图层:BizSearchType.BizSearchTypePoiParentPoint;BizSearchType.BizSearchTypePoiChildPoint;BizSearchType.BizSearchTypePoiLabel
 图层-获取搜索具体业务图层：BaseLayer com.autonavi.gbl.layer.BizSearchControl.getSearchLayer(@BizSearchType.BizSearchType1 int eType)
 图层-搜索线图层业务：void com.autonavi.gbl.layer.BizSearchControl.updateSearchLine(ArrayList< BizLineBusinessInfo > vecLineInfo)
 图层-搜索区域图层业务，单区域面：void com.autonavi.gbl.layer.BizSearchControl.updateSearchPolygon(BizPolygonBusinessInfo polygonInfo)
@@ -649,6 +650,10 @@ AOI:area of interest
 日志关键字-导航终点：endPoiInfo|naviPos
 日志关键字-导航当前定位：onLocationChanged: location|GpsManagerImpl: LocationChange  GPS|the currentPoi is : PoiData|GPS Location = Location
 日志关键字-仪表车速：I/525_lt_navi_240530_LowFreqLogger(19465): 1003, 1717655599, altitude: 23.0, lon,lat is: 119.01097138888889,32.1523675, time: 1717655599187, speed: 38.71844, provider: gps
+日志关键字-ETA：routeRemainTime_String='14分钟', eTA='11:47'
+日志关键字-网络：setNetworkStatus:|mqttSDK__getActiveNetworkInfo activeNetworkInfo =|getNetworkType
+高德回调-光柱图：com.autonavi.gbl.guide.observer.INaviObserver#onUpdateTMCLightBar(ArrayList<LightBarInfo> lightBarInfo, LightBarDetail lightBarDetail, long passedIdx, boolean dataStatus)
+高德数据-ETA：NaviInfo.routeRemain
 两点之间距离：BizLayerUtil.calcDistanceBetweenPoints(Coord2DDouble startP, Coord2DDouble endP)
 高德SDK文件：/sdcard/Android/data/com.lion.appfwk.navi/files/AutoSdkData
 电子眼-更新区间测试电子眼动态实时信息：INaviObserver.onUpdateIntervalCameraDynamicInfo.onUpdateIntervalCameraDynamicInfo(ArrayList<NaviIntervalCameraDynamicInfo> cameraDynamicList)
@@ -657,7 +662,8 @@ AOI:area of interest
 黑夜白天模式-鹰眼：MapView.getOperatorStyle().setMapStyle(MapStyleParam styleParam, boolean bRepeat)
 git命令-push：git push origin HEAD:refs/for/分支名
 git命令-github push：git push origin master
-
+手机端发送车机端-路线偏好：com.autonavi.gbl.user.msgpush.observer.IMsgPushServiceObserver#notifyMessage(PlanPrefPushMsg msg)
+导航：GuideService.setNaviPath(NaviPath naviPath);GuideService.startNavi(long id, @NaviType1 int type)
 
 导航中偏航抑制逻辑
 解决方案：
