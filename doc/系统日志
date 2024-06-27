@@ -1,0 +1,33 @@
+Line 204640: 06-20 11:04:59.354 E/ActivityManager(  482): ANR in com.lion.appfwk.navi (com.lion.appfwk.navi/.activity.MainActivity)
+Line 204868: 06-20 11:04:59.373 D/ActivityManager(  482): Completed ANR of com.lion.appfwk.navi in 11425ms, latency 13ms
+Line 204869: 06-20 11:04:59.375 W/ActivityTaskManager(  482):   Force finishing activity com.lion.appfwk.navi/.activity.MainActivity
+Line 204870: 06-20 11:04:59.381 I/DropBoxManagerService(  482): add tag=system_app_anr isTagEnabled=true flags=0x2
+Line 204975: 06-20 11:04:59.458 I/ActivityManager(  482): Killing 19336:com.lion.appfwk.navi/1000 (adj 0): user request after error
+Line 205224: 06-20 11:04:59.633 W/InputDispatcher(  482): channel '6bcb953 com.lion.appfwk.navi (server)' ~ Consumer closed input channel or an error occurred.  events=0x9
+Line 205225: 06-20 11:04:59.633 E/InputDispatcher(  482): channel '6bcb953 com.lion.appfwk.navi (server)' ~ Channel is unrecoverably broken and will be disposed!
+Line 205253: 06-20 11:04:59.641 I/WindowManager(  482): WIN DEATH: Window{6bcb953 u0 com.lion.appfwk.navi}
+Line 205255: 06-20 11:04:59.641 I/libprocessgroup(  482): Successfully killed process cgroup uid 1000 pid 19336 in 179ms
+Line 205284: 06-20 11:04:59.654 I/WindowManager(  482): WIN DEATH: Window{7b69d43 u0 com.lion.appfwk.navi/com.lion.appfwk.navi.activity.MainActivity}
+Line 205542: 06-20 11:04:59.734 I/ActivityManager(  482): Start proc 29699:com.lion.appfwk.navi/1000 for service {com.lion.appfwk.navi/com.lion.appfwk.navi.proxy.service.NaviService}
+Line 216222: 06-20 11:05:08.307 I/ActivityTaskManager(  482): START u0 {flg=0x10200000 cmp=com.lion.appfwk.navi/.activity.StartupActivity} from uid 1000
+Line 216476: 06-20 11:05:08.419 I/ActivityTaskManager(  482): START u0 {cmp=com.lion.appfwk.navi/.activity.LauncherActivity} from uid 1000
+Line 218318: 06-20 11:05:09.538 I/ActivityTaskManager(  482): START u0 {cmp=com.lion.appfwk.navi/.activity.MainActivity} from uid 1000
+Line 291702: 06-20 11:06:09.500 I/ActivityTaskManager(  482): START u0 {flg=0x10200000 cmp=com.desaysv.launcher/com.desaysv.appmenu.activity.AppMenuActivity (has extras)} from uid 1000
+Line 293940: 06-20 11:06:11.694 I/ActivityTaskManager(  482): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x10000000 cmp=com.desaysv.setting/.view.activity.SettingActivity} from uid 1000
+Line 306907: 06-20 11:06:21.232 E/ActivityManager(  482): ANR in com.lion.appfwk.navi (com.lion.appfwk.navi/.activity.MainActivity)
+Line 307199: 06-20 11:06:21.235 D/ActivityManager(  482): Completed ANR of com.lion.appfwk.navi in 9807ms, latency 3ms
+Line 307200: 06-20 11:06:21.235 W/ActivityTaskManager(  482):   Force finishing activity com.lion.appfwk.navi/.activity.MainActivity
+Line 307209: 06-20 11:06:21.239 I/DropBoxManagerService(  482): add tag=system_app_anr isTagEnabled=true flags=0x2
+Line 307210: 06-20 11:06:21.241 I/ActivityManager(  482): Killing 29699:com.lion.appfwk.navi/1000 (adj 50): user request after error
+Line 307275: 06-20 11:06:21.409 W/InputDispatcher(  482): channel 'abae8f9 com.lion.appfwk.navi (server)' ~ Consumer closed input channel or an error occurred.  events=0x9
+Line 307277: 06-20 11:06:21.409 E/InputDispatcher(  482): channel 'abae8f9 com.lion.appfwk.navi (server)' ~ Channel is unrecoverably broken and will be disposed!
+Line 307335: 06-20 11:06:21.425 I/WindowManager(  482): WIN DEATH: Window{abae8f9 u0 com.lion.appfwk.navi}
+Line 307347: 06-20 11:06:21.442 I/WindowManager(  482): WIN DEATH: Window{4bd0c6d u0 com.lion.appfwk.navi/com.lion.appfwk.navi.activity.MainActivity}
+Line 307352: 06-20 11:06:21.457 I/libprocessgroup(  482): Successfully killed process cgroup uid 1000 pid 29699 in 212ms
+Line 307406: 06-20 11:06:21.487 I/ActivityManager(  482): Start proc 30435:com.lion.appfwk.navi/1000 for service {com.lion.appfwk.navi/com.lion.appfwk.protocol.service.ProtocolService}
+Line 308983: 06-20 11:06:22.260 I/ActivityTaskManager(  482): START u0 {flg=0x10200000 cmp=com.lion.appfwk.navi/.activity.StartupActivity} from uid 1000
+Line 309159: 06-20 11:06:22.326 I/ActivityTaskManager(  482): START u0 {cmp=com.lion.appfwk.navi/.activity.LauncherActivity} from uid 1000
+Line 310608: 06-20 11:06:23.456 I/ActivityTaskManager(  482): START u0 {cmp=com.lion.appfwk.navi/.activity.MainActivity} from uid 1000
+
+
+日志关键字：Killing |ANR in|Completed ANR|Force finishing|add tag=|Start proc|libprocessgroup|WIN DEATH:|Consumer closed input|Channel is unrecoverably broken|START u0

@@ -528,6 +528,7 @@ BizGuideRouteControl.switchSelectedPath:这种方式不会清除路线，而是�
 算路类型：NaviPath.setType(int value)
 算路-请求：RouteService.requestRoute(RouteOption routeOption)
 算路-错误码-取消算路：Route.ErrorCodeUserCancel
+算路-在线算路失败转离线算路：RouteOption.setTrySwitchToLocal(boolean value)
 续航：NaviPath.setScene(@SceneFlagType1 int value)
 设置导航线路：GuideService.setNaviPath(NaviPath naviPath)
 设置导航主线路：GuideService.selectMainPathID(long pathID)
@@ -636,7 +637,7 @@ adb命令-autohelper悬浮窗权限：adb shell pm grant com.autonavi.amapauto.a
 adb命令-autohelper授予网络权限：adb shell pm grant com.autonavi.amapauto.autohelper android.permission.INTERNET
 adb命令-清缓存：adb shell pm clear com.lion.appfwk.navi
 adb命令-白天黑夜模式：adb shell su 0 cmd uimode night no/adb shell su 0 cmd uimode night yes
-adb命令-install失败：adb shell;cd /product/app/LionNavi/;rm -rf LionNavi.apk;setprop persist.sv.enable_adb_install 1;
+adb命令-install失败：adb root &adb disable-verity & adb remount;adb shell;cd /product/app/LionNavi/;rm -rf LionNavi.apk;setprop persist.sv.enable_adb_install 1;
 adb命令-清除缓存：adb shell pm clear com.lion.appfwk.navi
 历史记录-搜索历史:UserTrackService.getSearchHistory()
 历史记录-添加搜索历史:UserTrackService.addSearchHistory(SearchHistoryItem item, @SyncMode1 int mode)
@@ -669,6 +670,10 @@ git命令-push：git push origin HEAD:refs/for/分支名
 git命令-github push：git push origin master
 手机端发送车机端-路线偏好：com.autonavi.gbl.user.msgpush.observer.IMsgPushServiceObserver#notifyMessage(PlanPrefPushMsg msg)
 导航：GuideService.setNaviPath(NaviPath naviPath);GuideService.startNavi(long id, @NaviType1 int type)
+目录-apk目录：product/app/LionNavi
+经纬度-坐标转换成经纬度：OperatorPosture.mapToLonLat(CommonFavoriteItem.point_x, CommonFavoriteItem.point_y);
+
+
 
 导航中偏航抑制逻辑
 解决方案：
