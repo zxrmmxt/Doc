@@ -666,7 +666,7 @@ AOI:area of interest
 电子眼-显示电子眼信息（包括区间测速电子眼）：INaviObserver.onShowNaviCameraExt(ArrayList<NaviCameraExt> naviCameraList)
 视窗模式：Fragment.onMultiWindowModeChanged(boolean isInMultiWindowMode)
 黑夜白天模式-鹰眼：MapView.getOperatorStyle().setMapStyle(MapStyleParam styleParam, boolean bRepeat)
-git命令-push：git push origin HEAD:refs/for/分支名
+git命令-gerrit push：git push origin HEAD:refs/for/分支名
 git命令-github push：git push origin master
 手机端发送车机端-路线偏好：com.autonavi.gbl.user.msgpush.observer.IMsgPushServiceObserver#notifyMessage(PlanPrefPushMsg msg)
 导航：GuideService.setNaviPath(NaviPath naviPath);GuideService.startNavi(long id, @NaviType1 int type)
