@@ -1,0 +1,5 @@
+<declare-styleable name="CustomArray">
+    <attr name="integerArray" format="integer[]"/>
+    <attr name="stringArray" format="string[]"/>
+    <attr name="colorArray" format="color[]"/>
+</declare-styleable>

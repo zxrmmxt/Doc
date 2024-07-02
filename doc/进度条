@@ -1,0 +1,33 @@
+<ProgressBar
+    android:id="@+id/pb_loading2"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:minHeight="@dimen/auto_dimen2_10"
+    android:maxHeight="@dimen/auto_dimen2_10"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:max="100"
+    android:indeterminateOnly="false"
+    android:progress="0"
+    android:progressDrawable="@drawable/lt_custom_bar_loading3_progress_drawable"
+    />
+
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@android:id/background">
+        <shape>
+            <solid android:color="@color/color_globe_progress_bar_bg" />
+        </shape>
+    </item>
+    <item android:id="@android:id/progress">
+        <clip android:gravity="left">
+            <shape>
+                <solid android:color="@color/lt_common_color_1072d3_ff" />
+            </shape>
+        </clip>
+    </item>
+</layer-list>
+
+android:gravity="left" 进度从左边往右或进度从右往左

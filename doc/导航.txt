@@ -639,6 +639,7 @@ adb命令-清缓存：adb shell pm clear com.lion.appfwk.navi
 adb命令-白天黑夜模式：adb shell su 0 cmd uimode night no/adb shell su 0 cmd uimode night yes
 adb命令-install失败：adb root &adb disable-verity & adb remount;adb shell;cd /product/app/LionNavi/;rm -rf LionNavi.apk;setprop persist.sv.enable_adb_install 1;
 adb命令-清除缓存：adb shell pm clear com.lion.appfwk.navi
+adb命令-无线调试：adb tcpip 5555;adb connect 192.168.0.100:5555;
 历史记录-搜索历史:UserTrackService.getSearchHistory()
 历史记录-添加搜索历史:UserTrackService.addSearchHistory(SearchHistoryItem item, @SyncMode1 int mode)
 历史记录-历史路径:UserTrackService.getHistoryRoute()
@@ -672,7 +673,7 @@ git命令-github push：git push origin master
 导航：GuideService.setNaviPath(NaviPath naviPath);GuideService.startNavi(long id, @NaviType1 int type)
 目录-apk目录：product/app/LionNavi
 经纬度-坐标转换成经纬度：OperatorPosture.mapToLonLat(CommonFavoriteItem.point_x, CommonFavoriteItem.point_y);
-
+交通事件卡片-交通事件、云控事件：ISDKUIView、TrafficEventDetailView、CloudEventDetailView
 
 
 导航中偏航抑制逻辑

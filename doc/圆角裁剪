@@ -1,0 +1,9 @@
+@Override
+protected void onDraw(Canvas canvas) {
+    canvas.save();
+    Path path = new Path();
+    RectF rectF = new RectF(0, 0, mWidth, mHeight);
+    path.addRoundRect(rectF, 16, 16, Path.Direction.CCW);
+    canvas.clipPath(path);
+    super.onDraw(canvas);
+}
