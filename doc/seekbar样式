@@ -1,0 +1,19 @@
+<SeekBar
+    android:id="@+id/seekbar_voice"
+    android:layout_width="0dp"
+    android:layout_height="@dimen/auto_dimen2_24"
+    android:layout_marginStart="@dimen/auto_dimen2_14"
+    android:background="@null"
+    android:paddingStart="0dp"
+    android:paddingEnd="0dp"
+    android:progress="30"
+    android:progressDrawable="@drawable/voice_volume_seek_bar_progress_drawable"
+    android:thumb="@null"
+    app:layout_constraintBottom_toBottomOf="@id/siv_volume_bg"
+    app:layout_constraintEnd_toEndOf="@id/iv_volume_container_bg"
+    app:layout_constraintStart_toEndOf="@id/siv_volume_bg"
+    app:layout_constraintTop_toTopOf="@id/siv_volume_bg" />
+
+<!--左右padding设置为0时Thumb处于左右两侧会显示不完整，只显示一半-->
+<!--所以左右padding出Thumb的的1/2宽度，我Thumb宽度是10dp，这里设置5dp即可，SeekBar整体宽度+10dp-->
+不显示thumb时，设置左右的padding为0

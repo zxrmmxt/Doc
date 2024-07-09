@@ -673,7 +673,8 @@ git命令-github push：git push origin master
 导航：GuideService.setNaviPath(NaviPath naviPath);GuideService.startNavi(long id, @NaviType1 int type)
 目录-apk目录：product/app/LionNavi
 经纬度-坐标转换成经纬度：OperatorPosture.mapToLonLat(CommonFavoriteItem.point_x, CommonFavoriteItem.point_y);
-交通事件卡片-交通事件、云控事件：ISDKUIView、TrafficEventDetailView、CloudEventDetailView
+卡片-交通事件、云控事件：ISDKUIView、TrafficEventDetailView、CloudEventDetailView
+卡片-关键日志：startSearchAround current is charge request parking|update Parking Info|已为您推荐|hideAroundCard|隐藏当前卡片|showCard:|showCard isAllow:|executeToShow
 
 
 导航中偏航抑制逻辑

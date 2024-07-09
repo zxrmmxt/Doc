@@ -31,3 +31,4 @@ Line 310608: 06-20 11:06:23.456 I/ActivityTaskManager(  482): START u0 {cmp=com.
 
 
 日志关键字：Killing |ANR in|Completed ANR|Force finishing|add tag=|Start proc|libprocessgroup|WIN DEATH:|Consumer closed input|Channel is unrecoverably broken|START u0
+crash关键字：Process: com.lion.appfwk.navi, PID:

@@ -1,0 +1,17 @@
+/**
+ * 首次进入主图界面，打开设置快捷卡片，卡片和底部导航栏重叠，进入导航后正常，需要判断卡片是否和底部导航栏重叠，重叠需要增加底部的margin
+ */
+private void setScrollViewPosition() {
+    View scrollView = findViewById(R.id.sv_setting);
+    if (!(scrollView instanceof ScrollView)) {
+        return;
+    }
+    scrollView.post(() -> {
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) scrollView.getLayoutParams();
+        boolean isFullScreen = settingRoot.getBottom() == SCREEN_HEIGHT;
+        Logger.d(TAG, "setScrollViewPosition:scrollView left={?},top={?},right={?},bottom={?},settingRoot.getBottom()={?},ScreenUtils.getFullActivityHeight={?}", scrollView.getLeft(), scrollView.getTop(), scrollView.getRight(), scrollView.getBottom(), settingRoot.getBottom(), ScreenUtils.getFullActivityHeight(getContext()));
+        Logger.d(TAG, "setScrollViewPosition:isFullScreen=" + isFullScreen);
+        layoutParams.bottomMargin = ResUtil.getDimension(isFullScreen ? R.dimen.auto_dimen2_158 : R.dimen.auto_dimen2_30);
+        scrollView.setLayoutParams(layoutParams);
+    });
+}
