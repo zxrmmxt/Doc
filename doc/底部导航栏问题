@@ -8,10 +8,19 @@ private void setScrollViewPosition() {
     }
     scrollView.post(() -> {
         ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) scrollView.getLayoutParams();
-        boolean isFullScreen = settingRoot.getBottom() == SCREEN_HEIGHT;
-        Logger.d(TAG, "setScrollViewPosition:scrollView left={?},top={?},right={?},bottom={?},settingRoot.getBottom()={?},ScreenUtils.getFullActivityHeight={?}", scrollView.getLeft(), scrollView.getTop(), scrollView.getRight(), scrollView.getBottom(), settingRoot.getBottom(), ScreenUtils.getFullActivityHeight(getContext()));
+        int rootHeight = settingRoot.getBottom();
+        Logger.d(TAG, "setScrollViewPosition:rootHeight=" + rootHeight);
+        int activityHeight;
+        if (getActivity() != null) {
+            activityHeight = getActivity().getWindow().getDecorView().getBottom();
+            Logger.d(TAG, "setScrollViewPosition:activityHeight=" + activityHeight);
+        } else {
+            activityHeight = 0;
+            Logger.d(TAG, "setScrollViewPosition:activity null");
+        }
+        boolean isFullScreen = rootHeight == activityHeight;
         Logger.d(TAG, "setScrollViewPosition:isFullScreen=" + isFullScreen);
-        layoutParams.bottomMargin = ResUtil.getDimension(isFullScreen ? R.dimen.auto_dimen2_158 : R.dimen.auto_dimen2_30);
+        layoutParams.bottomMargin = ResUtil.getDimension(isFullScreen ? R.dimen.lt_dimen_bottom_to_screen : R.dimen.lt_dimen_bottom_to_navigation_bar);
         scrollView.setLayoutParams(layoutParams);
     });
 }

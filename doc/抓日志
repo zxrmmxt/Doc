@@ -1,0 +1,20 @@
+
+adb logcat | find LLpp
+这个命令是在命令行中使用adb logcat命令来查看android设备的日志信息，并通过管道（|）将其传递给find命令，find命令会搜索包含"LLpp"的日志行。
+
+但是，在Windows命令行中，并不支持直接使用find命令来过滤日志，你需要使用grep命令来代替find命令。
+
+解决方案一：
+
+在Windows命令行中，你可以使用如下命令来查看包含"LLpp"的日志行：
+
+adb logcat | findstr "LLpp"
+或者使用grep命令：
+
+adb logcat | grep "LLpp"
+解决方案二：
+
+如果你在Windows的PowerShell中，你可以使用如下命令来查看包含"LLpp"的日志行：
+
+adb logcat | Select-String "LLpp"
+注意：以上命令都需要在你的电脑已经安装了Android SDK，并且adb命令已经添加到了环境变量中。
