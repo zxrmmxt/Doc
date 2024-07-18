@@ -17,11 +17,11 @@ public class Main {
 //            System.out.println("当前项目的根路径是: " + PROJECT_PATH);
 //            renameDrawable();
 //            installApk(APK_DIR_8295);
-//            installApk(APK_DIR_X9SP);
-            installApk(APK_DIR_T18);
+            installApk(APK_DIR_X9SP);
+//            installApk(APK_DIR_T18);
 //            installApk(APK_DIR_T28);
 //            installApk("C:\\Users\\p004827\\Downloads\\2-apk\\LionLTNavigationService_inner.apk");
-//            JavaUtils.RuntimeUtils.exeAdb("adb logcat -d -v time");
+//            JavaUtils.RuntimeUtils.exeAdb("adb logcat -d -v time > "+JavaUtils.PROJECT_PATH+"\\log\\log.txt");
 //            JavaUtils.RuntimeUtils.exeAdb("adb logcat *：W");
 //            JavaUtils.RuntimeUtils.exeCmd();
         }).start();
@@ -29,6 +29,10 @@ public class Main {
 
     private static void installApk(String apkPath) {
         JavaUtils.RuntimeUtils.exeAdb(JavaUtils.StrUtils.buildStr("adb install -r -d {?}", JavaUtils.FileUtils.getMatchedFilePath(new File(apkPath), ".apk")));
+    }
+
+    private static void startApp() {
+        JavaUtils.RuntimeUtils.exeAdb("adb shell am start -n com.lion.appfwk.navi/com.lion.appfwk.navi.activity.StartupActivity");
     }
 
     private static void renameDrawable() {

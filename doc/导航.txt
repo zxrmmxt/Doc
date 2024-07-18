@@ -529,6 +529,7 @@ BizGuideRouteControl.switchSelectedPath:这种方式不会清除路线，而是�
 算路-请求：RouteService.requestRoute(RouteOption routeOption)
 算路-错误码-取消算路：Route.ErrorCodeUserCancel
 算路-在线算路失败转离线算路：RouteOption.setTrySwitchToLocal(boolean value)
+算路-算路失败的情况下，BL组件内部是否重新发起离线算路。true 自动再次发起离线算路 false 算路结束，BL内部不会发起离线算路：PathResultData.online2OfflineInfo.isRetryingRequestByBL
 续航：NaviPath.setScene(@SceneFlagType1 int value)
 设置导航线路：GuideService.setNaviPath(NaviPath naviPath)
 设置导航主线路：GuideService.selectMainPathID(long pathID)
@@ -675,6 +676,13 @@ git命令-github push：git push origin master
 经纬度-坐标转换成经纬度：OperatorPosture.mapToLonLat(CommonFavoriteItem.point_x, CommonFavoriteItem.point_y);
 卡片-交通事件、云控事件：ISDKUIView、TrafficEventDetailView、CloudEventDetailView
 卡片-关键日志：startSearchAround current is charge request parking|update Parking Info|已为您推荐|hideAroundCard|隐藏当前卡片|showCard:|showCard isAllow:|executeToShow
+纹理：//设置图层业务样式回调接口BizControlService.setStyle(int engineId, IPrepareLayerStyle pStyle)
+终点区域-终点区域样式更新:BizAreaControl.updateStyle()
+终点区域-终点楼块高亮：OperatorBusiness.setHightlightBuilding(MsgDataBuildingFocus param)
+终点区域-清空终点区域:BizAreaControl.clearRouteEndArea(RouteEndAreaType.RouteEndAreaTypeAll)
+终点区域-绘制终点区域高亮:BizAreaControl.updateRouteEndAreas(BizRouteEndAreasInfo endAreasInfo, RectInt previewRect)
+终点区域-清除终点区域子点扎标信息:BizLabelControl.clearAllItems(BizLabelType.BizLabelTypeRoutePopEndArea)
+
 
 
 导航中偏航抑制逻辑
@@ -699,10 +707,6 @@ rerouteOption)
 
 服务区一定范围内即使实车偏离路线也不会触发偏航。clearPathsCacheStyle
 车标样式切换:BizCarControl.updateStyle()
-终点区域样式更新:BizAreaControl.updateStyle()
-清空终点区域:BizAreaControl.clearRouteEndArea(RouteEndAreaType.RouteEndAreaTypeAll)
-绘制终点区域高亮:BizAreaControl.updateRouteEndAreas(BizRouteEndAreasInfo endAreasInfo, RectInt previewRect)
-清除终点区域子点扎标信息:BizLabelControl.clearAllItems(BizLabelType.BizLabelTypeRoutePopEndArea)
 清空路线:BizGuideRouteControl.clearPaths()
 停车场扎点焦点：BizSearchControl.setFocus(BizSearchTypePoiParkRoute, String.valueOf(index), true)
 充电站扎点焦点：BizSearchControl.setFocus(BizSearchTypeChargeStation, String.valueOf(index), true)
