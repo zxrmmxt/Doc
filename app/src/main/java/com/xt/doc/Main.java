@@ -8,7 +8,8 @@ public class Main {
     private static final String APK_DIR_8295 = "D:\\WORK\\ASProject\\Chery\\dev_t28\\LTNavigationService\\app\\build\\outputs\\apk\\e0x_btech_8295Inner\\debug";
     private static final String APK_DIR_T28 = "D:\\WORK\\ASProject\\Chery\\dev_t28\\LTNavigationService\\app\\build\\outputs\\apk\\t28_btechInner\\debug";
     private static final String APK_DIR_X9SP = "D:\\WORK\\ASProject\\Chery\\t1ej\\LTNavigationService\\app\\build\\outputs\\apk\\inner\\debug";
-    private static final String APK_DIR_T18 = "C:\\Users\\p004827\\Downloads\\2-apk\\t18";
+    private static final String APK_DIR_T18_DOWNLOAD = "C:\\Users\\p004827\\Downloads\\2-apk\\t18";
+    private static final String APK_DIR_T18 = "D:\\WORK\\ASProject\\Chery\\dev_t28\\LTNavigationService\\app\\build\\outputs\\apk\\t18fl4_desayInner\\debug";
 
     public static void main(String[] args) {
         new Thread(() -> {

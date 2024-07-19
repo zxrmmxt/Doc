@@ -639,6 +639,8 @@ adb命令-autohelper授予网络权限：adb shell pm grant com.autonavi.amapaut
 adb命令-清缓存：adb shell pm clear com.lion.appfwk.navi
 adb命令-白天黑夜模式：adb shell su 0 cmd uimode night no/adb shell su 0 cmd uimode night yes
 adb命令-install失败：adb root &adb disable-verity & adb remount;adb shell;cd /product/app/LionNavi/;rm -rf LionNavi.apk;setprop persist.sv.enable_adb_install 1;
+adb命令-push SystemUI命令：adb root;adb remount;adb reboot;adb push C:\Users\p004827\Downloads\RockySystemUI.apk /system/priv-app/RockySystemUI/
+adb命令-push导航命令：adb root;adb remount;adb reboot;adb push C:\Users\p004827\Downloads\t18.apk /product/app/LionNavi/
 adb命令-清除缓存：adb shell pm clear com.lion.appfwk.navi
 adb命令-无线调试：adb tcpip 5555;adb connect 192.168.0.100:5555;
 历史记录-搜索历史:UserTrackService.getSearchHistory()

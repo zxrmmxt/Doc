@@ -1,0 +1,29 @@
+CameraType和SubCameraExtType两种电子眼类型在使用场景上有什么区别？
+610之前版本使用CameraType
+
+610与610之后版本使用SubCameraExtType
+
+
+
+11、导航区间测速电子眼并入导航电子眼
+代码变更：
+
+1） virtual void UpdateGuideCamera(const dice::vector<NaviCamera>& vecGuideCamera) = 0;接口参数变更为virtual void UpdateGuideCamera(const dice::vector<NaviCameraExt>& vecGuideCamera) = 0;
+
+2） 删除接口virtual void UpdateGuideIntervalCamera(const dice::vector<NaviIntervalCamera>& vecGuideIntervalCamera) = 0;
+
+3）删除GuideIntervalCameraLayerItem
+
+实现注意点：
+
+1）区间测速对应的图元从GuideIntervalCameraLayerItem修改为GuideCameraLayerItem。
+
+2）区间测速起点图元，GuideCameraLayerItem.mCameraExtType=SubCameraExtTypeIntervalvelocityStart
+
+3）区间测速终点图元，GuideCameraLayerItem.mCameraExtType=SubCameraExtTypeIntervalvelocityEnd
+
+4）600之前没有区间测速普通态，在工艺升级时补充了区间测速普通态（只有中文样式，显示区间二字）。
+
+
+判断是否是区间测速电子眼：LayerItem pItem;(pItem instanceof GuideCameraLayerItem) && (((GuideCameraLayerItem) pItem).getMCameraExtType() == SubCameraExtType.SubCameraExtTypeIntervalvelocityStart) && (pItem.getBusinessType() == BizRoadFacilityType.BizRoadFacilityTypeGuideCameraActive), itemStyleInfo.markerId);
+区间测速起点默认markId:ItemStyleInfo.markerId=guide_interval_camera_start_right.xml
