@@ -1,0 +1,27 @@
+override fun startQuickSettingAnimate(
+    view: View,
+    duration: Long
+) {
+    if (isAnimationsEnable()) {
+        // 需要隐藏，不然会闪一下
+        view.visibility = View.INVISIBLE
+        view.post {
+            val height = view.measuredHeight
+            val animatorHeight: ValueAnimator = ObjectAnimator()
+            animatorHeight.interpolator = AccelerateDecelerateInterpolator()
+            animatorHeight.duration = duration
+            animatorHeight.setIntValues(0, height)
+            animatorHeight.repeatCount = 0
+            animatorHeight.addUpdateListener { animation ->
+                val value = animation.animatedValue as Int
+                view.layoutParams.height = value
+                view.layoutParams = view.layoutParams
+                if (value > 0) {
+                    //延迟显示
+                    view.visibility = View.VISIBLE
+                }
+            }
+            animatorHeight.start()
+        }
+    }
+}

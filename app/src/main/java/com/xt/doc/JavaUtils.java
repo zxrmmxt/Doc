@@ -226,25 +226,24 @@ public class JavaUtils {
     }
 
     public static class RuntimeUtils {
-        public static void exeAdb(String command) {
+        public static boolean exeAdb(String command) {
             try {
                 System.out.println(StrUtils.buildStr("command:{?}", command));
                 Process process = Runtime.getRuntime().exec(command);
-
                 // 读取并打印adb命令的输出
                 BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    FileUtils.writeToFile(line, PROJECT_PATH + "\\log\\log.txt", false);
+                    System.out.println(line);
                 }
-
                 // 等待命令执行完成
-                process.waitFor();
-                System.out.println("Command executed successfully.");
-
+                int exitCode = process.waitFor();
+                System.out.println("exitCode=" + exitCode);
+                return exitCode == 0;
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            return false;
         }
 
         /**

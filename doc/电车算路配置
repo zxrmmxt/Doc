@@ -1,0 +1,25 @@
+电车算路需要设置哪些参数
+电车算路参数设置：
+1、车辆类型
+// 0：客车 1：货车 2：电动客车 3：电动货车 4：插电式混动客车 5：插电式混动货车
+boolean com.autonavi.gbl.route.RouteService.control(RouteControlKeyVehicleType, "2")；
+
+2、电动车当前电量（单位千瓦时）
+RouteOption.setVehicleCharge(6.56f);
+
+3、参数配置信息
+mRouteService.setElecInfoConfig(elecConfig);
+
+
+
+
+
+
+如何获取行程点的剩余电量信息？
+仅在线算路才支持行程点电量信息获取：
+1.规划页，通过路线数据获取
+ElecPathInfo com.autonavi.gbl.common.path.drive.DrivePathAccessor.getElecPathInfo()
+按行程点排序的剩余电量信息：ElecPathInfo.mEnergyConsume.vehiclechargeleft 途经1剩余电量，途经地2剩余电量....目的地剩余电量
+2.导航中，通过引导信息回调（一分钟一次）
+void com.autonavi.gbl.guide.observer.INaviObserver.onUpdateElecVehicleETAInfo(ArrayList< ElecVehicleETAInfo > elecVehicleETAInfo)
+电量信息：ElecVehicleETAInfo.energySum 按行程点顺序排列 如:途经地1、途经地2、目的地 ,单位百分之一wh或ml

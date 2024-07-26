@@ -11,16 +11,19 @@ public class Main {
     private static final String APK_DIR_T18_DOWNLOAD = "C:\\Users\\p004827\\Downloads\\2-apk\\t18";
     private static final String APK_DIR_T18 = "D:\\WORK\\ASProject\\Chery\\dev_t28\\LTNavigationService\\app\\build\\outputs\\apk\\t18fl4_desayInner\\debug";
 
+
     public static void main(String[] args) {
         new Thread(() -> {
 
             // 输出路径
 //            System.out.println("当前项目的根路径是: " + PROJECT_PATH);
 //            renameDrawable();
-//            installApk(APK_DIR_8295);
-            installApk(APK_DIR_X9SP);
+//            JavaUtils.RuntimeUtils.exeAdb("adb devices");
+            installApkAndStart(APK_DIR_8295);
+//            installApk(APK_DIR_X9SP);
 //            installApk(APK_DIR_T18);
 //            installApk(APK_DIR_T28);
+//            restart();
 //            installApk("C:\\Users\\p004827\\Downloads\\2-apk\\LionLTNavigationService_inner.apk");
 //            JavaUtils.RuntimeUtils.exeAdb("adb logcat -d -v time > "+JavaUtils.PROJECT_PATH+"\\log\\log.txt");
 //            JavaUtils.RuntimeUtils.exeAdb("adb logcat *：W");
@@ -28,8 +31,23 @@ public class Main {
         }).start();
     }
 
-    private static void installApk(String apkPath) {
-        JavaUtils.RuntimeUtils.exeAdb(JavaUtils.StrUtils.buildStr("adb install -r -d {?}", JavaUtils.FileUtils.getMatchedFilePath(new File(apkPath), ".apk")));
+    private static void restart() {
+        JavaUtils.RuntimeUtils.exeAdb("adb shell am force-stop com.lion.appfwk.navi");
+        JavaUtils.RuntimeUtils.exeAdb("adb shell am start com.lion.appfwk.navi/.activity.StartupActivity");
+    }
+
+    private static void installApkAndStart(String apkPath) {
+        if (JavaUtils.RuntimeUtils.exeAdb(JavaUtils.StrUtils.buildStr("adb install -r -d {?}", JavaUtils.FileUtils.getMatchedFilePath(new File(apkPath), ".apk")))) {
+            System.out.println("安装成功");
+        } else {
+            System.out.println("安装失败");
+        }
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        restart();
     }
 
     private static void startApp() {

@@ -1,0 +1,40 @@
+在Android中，为Dialog添加入场动画可以通过Window类的setWindowAnimations方法来设置。你需要在创建Dialog实例后，在调用show方法之前设置动画资源。
+
+假设你已经有一个动画资源文件，例如R.anim.dialog_enter_anim，你可以这样设置动画：
+Dialog dialog = new Dialog(context);
+// 设置 Dialog 的布局等其他属性
+dialog.setContentView(R.layout.your_dialog_layout);
+
+// 设置 Dialog 的入场动画
+dialog.getWindow().setWindowAnimations(R.style.DialogAnimation);
+
+// 显示 Dialog
+dialog.show();
+
+然后在res/values/styles.xml中定义DialogAnimation样式，并引用入场动画资源：
+<style name="DialogAnimation" parent="android:Animation">
+    <item name="android:windowEnterAnimation">@anim/dialog_enter_anim</item>
+    <item name="android:windowExitAnimation">@anim/dialog_exit_anim</item>
+</style>
+
+dialog_enter_anim.xml是你的动画资源文件，它定义了动画的具体效果。例如：
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <alpha
+        android:fromAlpha="0.0"
+        android:toAlpha="1.0"
+        android:duration="300" />
+    <!-- 定义其他动画效果，例如位置移动等 -->
+    <translate
+        android:duration="100"
+        android:fromXDelta="0"
+        android:fromYDelta="1000"
+        android:toXDelta="0"
+        android:toYDelta="0" />
+</set>
+
+dialog_exit_anim.xml是你的动画资源文件，它定义了动画的具体效果。例如：
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
+        android:duration="300" />
+    <!-- 定义其他动画效果，例如位置移动等 -->
+</set>

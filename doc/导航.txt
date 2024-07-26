@@ -406,6 +406,7 @@ android:backgroundDimAmount：
 平行路-主辅路算路类型：RouteType.RouteTypeParallelRoad
 平行路-主辅路更新：IPosParallelRoadObserver.onParallelRoadUpdate
 平行路-主辅路切换关键字：onParallelWayClick execute|updateParallelRoad:mParallelRoadState|updateParallelRoad:road state not changed
+平行路切换成功：平行路切换成功与算路识别并无直接关联关系的。链路是 HMI点击主辅路 -> 收到平行路切换成功通知 -> 重新发起算路。平行路通知是有定位相关模块通知回调的，发起算路是有路线规划相关模块回调的。两者并无关联关系。
 图层实时路况显示隐藏：MapControllerStatesType.MAP_CONTROLLER_ONOFF_TRAFFIC_STATE
 图层全量事件显示隐藏：OpenLayerID.OpenLayerIDRouteTraffic  9005：对应服务9000005=9000003+9000004全量事件
 矢量路口大图：itemType = LayerItemType.LayerItemVectorCrossType  businessType = BizRoadCrossType.BizRoadCrossTypeVector
@@ -643,6 +644,11 @@ adb命令-push SystemUI命令：adb root;adb remount;adb reboot;adb push C:\User
 adb命令-push导航命令：adb root;adb remount;adb reboot;adb push C:\Users\p004827\Downloads\t18.apk /product/app/LionNavi/
 adb命令-清除缓存：adb shell pm clear com.lion.appfwk.navi
 adb命令-无线调试：adb tcpip 5555;adb connect 192.168.0.100:5555;
+adb命令-获取手机上当前正在运行的APP的包名+Activity名：adb shell dumpsys window | findstr mCurrentFocus
+adb命令-ADB启动APP命令：adb shell am start com.lion.appfwk.navi/.activity.StartupActivity
+adb命令-找到这个APP入口Activity的命令：【adb shell dumpsys package com.lion.appfwk.navi】;  结果类似【b70c46b com.xxx.xxx/.ui.activity.LoadingActivity filter 9e6bc8】加入搜索条件:【findstr \/ | findstr filter】，指令调整为【adb shell dumpsys package com.lion.appfwk.navi  | findstr \/ |findstr filter】搜索条件包括两个条件【一：有/字符的，二：有filter字符串的】
+adb命令-有些傻逼APP，它会隐藏很多Activity的权限，用它定义的MainActivity去启动app会得到权限不足的回答。这样的APP，必须找到它的启动Activity办法是当启动的时候，不停的用命令提示符使用adb命令：【adb shell dumpsys activity top | findstr ACTIVITY】，去找到启动页面，这里特别点名：番茄免费小说，没错，说的就是你，傻逼APP。
+adb命令-看crash日志：adb logcat -b crash
 历史记录-搜索历史:UserTrackService.getSearchHistory()
 历史记录-添加搜索历史:UserTrackService.addSearchHistory(SearchHistoryItem item, @SyncMode1 int mode)
 历史记录-历史路径:UserTrackService.getHistoryRoute()
