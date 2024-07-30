@@ -20,11 +20,11 @@ public class Main {
 //            renameDrawable();
 //            JavaUtils.RuntimeUtils.exeAdb("adb devices");
             installApkAndStart(APK_DIR_8295);
-//            installApk(APK_DIR_X9SP);
-//            installApk(APK_DIR_T18);
-//            installApk(APK_DIR_T28);
+//            installApkAndStart(APK_DIR_X9SP);
+//            installApkAndStart(APK_DIR_T18);
+//            installApkAndStart(APK_DIR_T28);
 //            restart();
-//            installApk("C:\\Users\\p004827\\Downloads\\2-apk\\LionLTNavigationService_inner.apk");
+//            installApkAndStart("C:\\Users\\p004827\\Downloads\\2-apk\\LionLTNavigationService_inner.apk");
 //            JavaUtils.RuntimeUtils.exeAdb("adb logcat -d -v time > "+JavaUtils.PROJECT_PATH+"\\log\\log.txt");
 //            JavaUtils.RuntimeUtils.exeAdb("adb logcat *：W");
 //            JavaUtils.RuntimeUtils.exeCmd();
@@ -32,8 +32,16 @@ public class Main {
     }
 
     private static void restart() {
-        JavaUtils.RuntimeUtils.exeAdb("adb shell am force-stop com.lion.appfwk.navi");
-        JavaUtils.RuntimeUtils.exeAdb("adb shell am start com.lion.appfwk.navi/.activity.StartupActivity");
+        if (JavaUtils.RuntimeUtils.exeAdb("adb shell am force-stop com.lion.appfwk.navi")) {
+            System.out.println("停止进程成功");
+        } else {
+            System.out.println("停止进程失败");
+        }
+        if (JavaUtils.RuntimeUtils.exeAdb("adb shell am start com.lion.appfwk.navi/.activity.StartupActivity")) {
+            System.out.println("启动成功");
+        } else {
+            System.out.println("启动失败");
+        }
     }
 
     private static void installApkAndStart(String apkPath) {
