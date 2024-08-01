@@ -29,15 +29,20 @@ override fun startQuickSettingAnimate(view: View, duration: Long) {
 /**
  * 快捷设置卡片展开动画
  */
-override fun startQuickSettingAnimate(view: View, duration: Long) {
+override fun startQuickSettingAnimate(view: View, contentView: View, duration: Long) {
     if (isAnimationsEnable()) {
-        val p1 = PropertyValuesHolder.ofFloat("alpha", 0f, 1f)
-        val p2 = PropertyValuesHolder.ofFloat("scaleX", 0f, 1f)
-        val p3 = PropertyValuesHolder.ofFloat("scaleY", 0f,1f)
         view.pivotX = 0F
         view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
         view.pivotY = view.measuredHeight.toFloat()
-        ObjectAnimator.ofPropertyValuesHolder(view, p1, p2, p3).setDuration(duration).start()
+        ObjectAnimator.ofPropertyValuesHolder(
+            view,
+            PropertyValuesHolder.ofFloat("scaleX", 0f, 1f),
+            PropertyValuesHolder.ofFloat("scaleY", 0f, 1f)
+        ).setDuration(duration).start()
+        ObjectAnimator.ofPropertyValuesHolder(
+            contentView,
+            PropertyValuesHolder.ofFloat("alpha", 0f, 0f, 0f, 1f)
+        ).setDuration(duration).start()
     }
 }
 
