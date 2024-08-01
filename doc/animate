@@ -79,6 +79,41 @@ override fun startUnfoldParkingCardAnimate(
     }
 }
 
+/**
+ * 停车场卡片收起动画
+ */
+override fun startFoldParkingCardAnimate(foldView: View, unfoldView: View, duration: Long) {
+    if (isAnimationsEnable()) {
+        foldView.visibility = View.VISIBLE
+        foldView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+        unfoldView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+        unfoldView.pivotX = 0F
+        unfoldView.pivotY = 0F
+        val moveValue = unfoldView.measuredHeight.toFloat() - foldView.measuredHeight.toFloat()
+        val objectAnimator = ObjectAnimator.ofPropertyValuesHolder(
+            unfoldView,
+            PropertyValuesHolder.ofFloat("alpha", 1f, 0f),
+            PropertyValuesHolder.ofFloat(
+                "translationY",
+                0f,
+                -moveValue
+            )
+        ).setDuration(duration)
+        objectAnimator.addListener(onEnd = {
+            Logger.d("startFoldParkingCardAnimate", "onEnd")
+            unfoldView.visibility = View.GONE
+            // 还原移动距离和透明度值，否则展开动画会有异常
+            unfoldView.translationY = moveValue
+            unfoldView.alpha = 1f
+        })
+        objectAnimator.start()
+        ObjectAnimator.ofPropertyValuesHolder(
+            foldView,
+            PropertyValuesHolder.ofFloat("alpha", 0f, 1f)
+        ).setDuration(duration).start()
+    }
+}
+
 
 import android.animation.PropertyValuesHolder; //导入方法依赖的package包/类
 @Override
