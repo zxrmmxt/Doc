@@ -1,0 +1,103 @@
+/**
+ * 快捷设置卡片展开动画
+ */
+override fun startQuickSettingAnimate(view: View, duration: Long) {
+    if (isAnimationsEnable()) {
+        // 需要隐藏，不然会闪一下
+        view.visibility = View.INVISIBLE
+        view.post {
+            val height = view.measuredHeight
+            val animatorHeight: ValueAnimator = ObjectAnimator()
+            animatorHeight.interpolator = AccelerateDecelerateInterpolator()
+            animatorHeight.duration = duration
+            animatorHeight.setIntValues(0, height)
+            animatorHeight.repeatCount = 0
+            animatorHeight.addUpdateListener { animation ->
+                val value = animation.animatedValue as Int
+                view.layoutParams.height = value
+                view.layoutParams = view.layoutParams
+                if (value > 0) {
+                    //延迟显示
+                    view.visibility = View.VISIBLE
+                }
+            }
+            animatorHeight.start()
+        }
+    }
+}
+
+/**
+ * 快捷设置卡片展开动画
+ */
+override fun startQuickSettingAnimate(view: View, duration: Long) {
+    if (isAnimationsEnable()) {
+        val p1 = PropertyValuesHolder.ofFloat("alpha", 0f, 1f)
+        val p2 = PropertyValuesHolder.ofFloat("scaleX", 0f, 1f)
+        val p3 = PropertyValuesHolder.ofFloat("scaleY", 0f,1f)
+        view.pivotX = 0F
+        view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+        view.pivotY = view.measuredHeight.toFloat()
+        ObjectAnimator.ofPropertyValuesHolder(view, p1, p2, p3).setDuration(duration).start()
+    }
+}
+
+/**
+ * 停车场卡片展开动画
+ */
+override fun startUnfoldParkingCardAnimate(
+    foldView: View,
+    unfoldView: View,
+    unfoldContentView: View,
+    duration: Long
+) {
+    if (isAnimationsEnable()) {
+        if (isAnimationsEnable()) {
+            foldView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+            unfoldView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+            unfoldView.pivotX = 0F
+            unfoldView.pivotY = 0F
+            ObjectAnimator.ofPropertyValuesHolder(
+                unfoldView,
+                PropertyValuesHolder.ofFloat(
+                    "translationY",
+                    -unfoldView.measuredHeight.toFloat(),
+                    0f
+                )
+            ).setDuration(duration)
+                .start()
+            ObjectAnimator.ofPropertyValuesHolder(
+                unfoldContentView,
+                PropertyValuesHolder.ofFloat("alpha", 0f, 1f),
+                PropertyValuesHolder.ofFloat(
+                    "translationY",
+                    20f,
+                    0f
+                )
+            ).setDuration((duration * 1.5).toLong())
+                .start()
+        }
+    }
+}
+
+
+import android.animation.PropertyValuesHolder; //导入方法依赖的package包/类
+@Override
+public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+    if (mode == DRAG) {
+        if (flingDuration > 0 && !isAnimating()) {
+            float factor = ((float) flingDuration / 1000f) * flingExaggeration;
+            float[] values = corrector.getValues();
+            float dx = (velocityX * factor) * values[Matrix.MSCALE_X];
+            float dy = (velocityY * factor) * values[Matrix.MSCALE_Y];
+            PropertyValuesHolder flingX = PropertyValuesHolder.ofFloat(FlingAnimatorHandler.PROPERTY_TRANSLATE_X, values[Matrix.MTRANS_X], values[Matrix.MTRANS_X] + dx);
+            PropertyValuesHolder flingY = PropertyValuesHolder.ofFloat(FlingAnimatorHandler.PROPERTY_TRANSLATE_Y, values[Matrix.MTRANS_Y], values[Matrix.MTRANS_Y] + dy);
+            valueAnimator = ValueAnimator.ofPropertyValuesHolder(flingX, flingY);
+            valueAnimator.setDuration(flingDuration);
+            valueAnimator.addUpdateListener(new FlingAnimatorHandler(corrector));
+            valueAnimator.setInterpolator(new DecelerateInterpolator());
+            valueAnimator.start();
+            return true;
+        }
+    }
+    return super.onFling(e1, e2, velocityX, velocityY);
+}

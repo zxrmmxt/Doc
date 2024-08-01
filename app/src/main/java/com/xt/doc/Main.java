@@ -5,6 +5,7 @@ import java.io.File;
 public class Main {
     private static final String TAG = Main.class.getSimpleName();
     // 获取当前类所在的路径
+    private static final String APK_DIR_E03 = "D:\\WORK\\ASProject\\Chery\\e03\\LTNavigationService\\app\\build\\outputs\\apk\\e03_inner\\debug";
     private static final String APK_DIR_8295 = "D:\\WORK\\ASProject\\Chery\\dev_t28\\LTNavigationService\\app\\build\\outputs\\apk\\e0x_btech_8295Inner\\debug";
     private static final String APK_DIR_T28 = "D:\\WORK\\ASProject\\Chery\\dev_t28\\LTNavigationService\\app\\build\\outputs\\apk\\t28_btechInner\\debug";
     private static final String APK_DIR_X9SP = "D:\\WORK\\ASProject\\Chery\\t1ej\\LTNavigationService\\app\\build\\outputs\\apk\\inner\\debug";
@@ -20,6 +21,7 @@ public class Main {
 //            renameDrawable();
 //            JavaUtils.RuntimeUtils.exeAdb("adb devices");
             installApkAndStart(APK_DIR_8295);
+//            installApkAndStart(APK_DIR_E03);
 //            installApkAndStart(APK_DIR_X9SP);
 //            installApkAndStart(APK_DIR_T18);
 //            installApkAndStart(APK_DIR_T28);
