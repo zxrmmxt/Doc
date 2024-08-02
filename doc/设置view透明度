@@ -1,0 +1,7 @@
+public void updateTrafficViewEnabled() {
+    // 1.无网络时不能切换路况开关
+    boolean isEnabled = NetworkUtils.getInstance().isNetworkConnected();
+    int alpha = isEnabled ? 255 : (int) (0.3 * 255);
+    trafficOpen.getBackground().setAlpha(alpha);
+    trafficClose.getBackground().setAlpha(alpha);
+}

@@ -20,10 +20,10 @@ public class Main {
 //            System.out.println("当前项目的根路径是: " + PROJECT_PATH);
 //            renameDrawable();
 //            JavaUtils.RuntimeUtils.exeAdb("adb devices");
-            installApkAndStart(APK_DIR_8295);
+//            installApkAndStart(APK_DIR_8295);
 //            installApkAndStart(APK_DIR_E03);
 //            installApkAndStart(APK_DIR_X9SP);
-//            installApkAndStart(APK_DIR_T18);
+            installApkAndStart(APK_DIR_T18);
 //            installApkAndStart(APK_DIR_T28);
 //            restart();
 //            installApkAndStart("C:\\Users\\p004827\\Downloads\\2-apk\\LionLTNavigationService_inner.apk");
