@@ -1,0 +1,55 @@
+1、概述
+       在做手机蓝牙4.0与BLE智能设备交互过程中遇到这样的问题：手机蓝牙和BLE智能设备连接一次或者三四次后，再无法连接。
+
+需要断开手机蓝牙或者重启APP或者重启手机或者重启BLE智能设备，才能再次连接BLE智能设备。
+
+2、原因
+    2.1）BLE蓝牙连接是单线程的，如果有某一个蓝牙和设备在连接中，其他蓝牙是无法连接成功的。
+
+    2.2）多次创建gatt连接对象的直接结果是创建过6个以上gatt后就会再也连接不上任何设备，原因应该是android中对BLE限制了同时连接的数量为6个。
+
+3、解决方案
+        上述问题主要是蓝牙一直在连接中或者连接池超出了上限而导致无法再次连接。
+
+解决办法是在每一次重新连接时都执行一次gatt.close()；关闭上一个连接。
+
+为什么不在gatt.disconnect()后加一条gatt.close()呢，原因是如果立即执行gatt.close()，会导致gattCallback无法收到BluetoothGatt.STATE_DISCONNECTED的状态。
+
+最好的办法是在gattCallback收到BluetoothGatt.STATE_DISCONNECTED后再执行gatt.close()这样逻辑比较好。
+
+       /**
+         * 连接状态改变，主要用来分析设备的连接与断开
+         * @param gatt GATT
+         * @param status 改变前状态
+         * @param newState 改变后状态
+         */
+        @Override
+        public void onConnectionStateChange(final BluetoothGatt gatt, final int status, final int newState) {
+            if (newState == BluetoothGatt.STATE_DISCONNECTED) {
+                close();
+            }
+        }
+
+   /**
+     * 关闭GATT
+     */
+    public synchronized void close() {
+        if (bluetoothGatt != null) {
+            bluetoothGatt.close();
+        }
+    }
+或者可以在连接前先断开：
+
+ if (bluetoothGatt!=null){
+            bluetoothGatt.close();
+        }
+        //连接前先断开连接
+        if (bluetoothLeDevice != null && bluetoothLeDevice.getDevice() != null) {
+            bluetoothLeDevice.getDevice().connectGatt(ViseBle.getInstance().getContext(), false, coreGattCallback);
+        }
+或者每次操作完成后把手机蓝牙关闭调：
+
+ if (bluetoothAdapter != null) {
+            bluetoothAdapter.disable();
+        }
+至此，本文结束！
