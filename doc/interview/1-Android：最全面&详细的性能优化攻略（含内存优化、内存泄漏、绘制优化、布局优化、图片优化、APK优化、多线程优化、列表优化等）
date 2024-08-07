@@ -1,0 +1,1290 @@
+前言：佛教中有一句话：初学者的心态，拥有初学者心态是件了不起的事情。真正的大师永远怀有一颗学徒的心。
+一、概述
+在Android中，性能优化是细分领域中最难且也是知识面涉及最深和最广的方向之一。
+
+更快：App流畅不卡顿，快速响应；
+
+更稳：App稳定运行，程序不崩溃（Crash）和无响应（ANR）；
+
+更省：节省资源，包括电量，内存，网络资源等。
+
+二、内存优化
+谈及内存优化，我们先来普及一下内存泄漏和内存溢出的知识：（熟悉的可以跳过）
+
+内存泄漏(memory leak)：指程序在申请内存后，无法释放已经申请的内存空间。就是说你在使用资源的时候，系统为你开辟一段空间，你使用完后忘记释放资源，这时资源一直被占用(未被回收)。虚拟机宁愿抛出OOM，也不愿意去回收被占用的内存。
+
+内存溢出(out of memory，也叫OOM)：系统在申请内存空间时，没有总够的内存空间供其使用。简单来说就是系统不能再分配你所需要的内存空间，比如你申请需要100M的内存空间，但是系统仅剩90M了，这时候就会内存溢出。举个例子，一个盘子最多只能装4个果子，你却装了5个果子，结果掉地上了不能吃，这就是溢出。（溢出会导致应用Crash崩溃）
+
+内存泄漏的本质原因：本该被回收的对象没有被回，继续停留着内存空间中，导致内存被占用。其实是持有引用者的生命周期>被持有引用者的生命周期。过多内存泄漏会把内存空间占用完，最终会导致内存溢出。
+
+从机制上的角度来说，由于存在java垃圾回收机制(GC)，理论上不存在内存泄漏，那么造成内存泄漏的绝大部分是外部认为因素，无意识持有引用。
+
+常见的内存溢出和解决方案：
+2.1 非静态内部类引用Activity的泄漏
+在java中，非静态(匿名)内部类默认持有外部类的引用，而静态内部类不会持有外部类的引用。这种原因造成内存泄漏常见的三种情况：静态实例、多线程、Handler等。
+
+（1）非静态内部类创建静态实例
+
+非静态内部类创建静态实例会导致内存泄漏，通常项目中，通常在Activity启动的时候创建单例数据，避免重复创建相同的数据，会在Activity内部创建一个非静态内部类的静态实例。反例：
+
+public class NotStaticActivityextends AppCompatActivity {
+    //非静态内部类实例引用，设置为静态
+    private static InnerClass sInnerClass;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        //保证非静态内部类实例只有一个
+        if (sInnerClass == null) {
+            sInnerClass = new InnerClass();
+        }
+    }
+
+    //非静态内部类
+    private class InnerClass {
+        //……
+    }
+}
+这样就在Activity里面创建了一个非静态内部类的静态实例InnerClass ，每次启动Activity都会使用该单例数据，这样做虽然避免了资源的重复创建，但是会造成内存泄漏，因为非静态内部类InnerClass 默认持有外部类Activity的引用，而该内部类InnerClass 又是一个静态的成员变量，则该实例的生命周期和应用的生命周期一样长，那么InnerClass 则会一直持有Activity的引用，导致Activity在销毁的时候无法被GC回收利用。
+
+造成内存泄漏的原因：非静态外部类(InnerClass)的生命周期 = 应用的生命周期，而且持有外部类Activity的引用，在Activity在销毁的时候无法被GC回收，从而导致内存泄漏。
+
+解决方法：1、将非静态内部类设置为静态内部类（静态内部类默认不持有外部类的引用）
+  //静态内部类
+    private static class InnerClass2 {
+        //……
+    }
+解决方法： 2、将外部类抽取出来封装成一个单例。(Java设计模式—单例模式)
+public class InnerClass3 extends AppCompatActivity {
+    private static final String TAG = InnerClass3.class.getSimpleName();
+    private static InnerClass3 sInnerClass3;
+
+    //单例
+    public InnerClass3 getInstance() {
+        if (sInnerClass3 == null) {
+            sInnerClass3 = new InnerClass3();
+        }
+        return sInnerClass3;
+    }
+}
+多线程造成内存泄漏：我们知道线程类属性非静态（匿名）内部类，多线程的使用主要是AsyncTask、实现Runnable接口，继承Thread类，在使用线程类时需要注意内存泄漏。
+
+（2）AsyncTask的使用
+
+造成内存泄漏的原因：在AsyncTask里面处理耗时操作时，AsyncTask还没操作完就将AsyncTaskActivity退出，但是此时AsyncTask已然持有AsyncTaskActivity的引用，导致AsyncTaskActivity无法被回收处理。
+
+解决办法：在使用AsyncTask的时候，在AsyncTaskActivity销毁时也取消AsyncTask相关的任务AsyncTask.cancel()，避免任务在后台浪费资源，避免内存泄漏。举个正例：
+
+public class AsyncTaskActivity extends AppCompatActivity {
+    private AsyncTask<Void, Void, Void> mAsyncTask;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        //AsyncTask执行任务
+        mAsyncTask = new AsyncTask<Void, Void, Void>() {
+            //开始之前的准备工作
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+            }
+
+            //相当于子线程，耗时操作
+            @Override
+            protected Void doInBackground(Void... voids) {
+                return null;
+            }
+
+            //主线程显示进度
+            @Override
+            protected void onProgressUpdate(Void... values) {
+                super.onProgressUpdate(values);
+            }
+
+            //相当于主线程，获取数据更新UI
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+            }
+        };
+
+        //执行异步线程任务
+        mAsyncTask.execute();
+    }
+
+    @Override
+    protected void onDestroy() {
+       //强制退出AsyncTask
+        mAsyncTask.cancel(true);
+        super.onDestroy();
+    }
+}
+（3）Thread类使用
+
+我们来看看Thread类的错误用法，反例：
+
+public class ThreadActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        //方式一：新建内部类
+        new MyThread().start();
+
+        //方式二：匿名Thread内部类
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    //自定义Thread
+    private class MyThread extends Thread {
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+上面两种创建Thread造成内存泄漏的原因：线程类Thread属于非静态内部类，它的生命周期比ThreadActivity的生命周期长，运行时默认持有外部类的引用，如果ThreadActivity需要销毁时，线程类Thread持有ThreadActivity的引用，导致ThreadActivity无法回收利用，造成内存泄漏。
+
+解决方法：1、将线程类Thread修改为静态内部类，线程类Thread则不再持有外部类的引用，如下例子：
+   //自定义Thread,设置为静态内部类
+    private static class MyThread extends Thread {
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+解决方法：2、当外部类结束时，强制结束线程，使得线程类的生命周期与外部类的生命周期一致。注意：Thread.stop()停止线程方法已经过时，stop()停止线程会产生不可预期的错误，不建议使用，可以参考Thread线程停止的正确方式。
+  @Override
+  protected void onDestroy() {
+        //Thread.stop方法以及过时而且这样停止线程会产生不可预期的错误，
+        //mMyThread.stop();
+        super.onDestroy();
+    }
+（4）Handler造成的内存泄漏
+
+Handler使用不当也会造成内存泄漏，我们来看看反例：
+
+public class HandlerActivity extends AppCompatActivity {
+    private Handler mHandler;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        //创建Handler
+        mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                //接收信息
+                switch (msg.what) {
+                    case 1:
+                        Log.e(TAG, "Handler==" + msg.obj);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+
+        //创建线程模拟发送数据
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //封装信息数据
+                Message message = Message.obtain();
+                message.what = 1;
+                message.obj = "Handler使用";
+                //Handler发送信息
+                mHandler.sendMessage(message);
+            }
+        }).start();
+    }
+}
+原因分析：通过内部类创建的mHandler对象，会隐式持有Activity的引用(HandlerActivity)，当mHandler.sendMessage(msg)时，最后会将mHander装入到Message中，并把这条Message推送到MessageQueque中，MessageQueque是在一个Looper线程中不断轮询处理消息的，如果Activity销毁时，handler消息队列中还有没处理或者正在处理消息，而Message持有Handler的引用（Android Handler消息机制使用和原理），Handler又持有Activity的引用，所以导致Activity无法被回收利用。
+
+我们用图解说明一下：
+
+
+
+解决方法：1、当外部类结束生命周期时，清空Handler内消息队列；
+   @Override
+    protected void onDestroy() {
+        //当外部类结束生命周期时，清空Handler内消息队列；
+        mHandler.removeCallbacksAndMessages(null);
+        super.onDestroy();
+    }
+解决方法：2、将内名内部类改为静态内部类，并对上下文或者Activity使用弱引用。
+    //将匿名内部类改为静态内部类，并对上下文或者Activity使用弱引用。
+    private static class MyHandler extends Handler{
+        //定义弱引用实例
+        WeakReference<Activity> mWeakReference;
+        public MyHandler(HandlerActivity activity) {
+            //构造方法中将Activity使用弱引用
+            mWeakReference = new WeakReference<Activity>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (mWeakReference.get() != null){
+                //UI更新
+            }
+        }
+    }
+静态static可以解决内存泄漏问题，使用弱引用也可以解决内存泄漏，但是需要等到Handler中的任务执行完才释放Activity，没有直接static释放得快。（Android的四种引用）
+
+2.2 static关键字修饰的成员变量
+（1）静态变量的单例模式
+
+我们知道被static修饰的成员变量的生命周期等于app应用程序的生命周期，如果静态成员变量持有Activity的引用，则会静态成员变量的生命周期大于Activity的引用的生命周期，当Activity的引用需要销毁回收利用时，导致静态成员变量持有Activity的引用而无法回收，从而导致内存泄漏。这里有一个非常典型的例子：单例模式(Java设计模式—单例模式)
+
+public class SingleInstanceClass extends AppCompatActivity {
+    private static final String TAG = SingleInstanceClass.class.getSimpleName();
+
+    private Context mContext;
+    private static SingleInstanceClass sInstanceClass;
+
+    //构造方法传入Activity的引用
+    public SingleInstanceClass(Context context) {
+        mContext = context;
+    }
+
+    //单例方式获取实例
+    public static SingleInstanceClass getInstance(Context context) {
+        if (sInstanceClass == null) {
+            sInstanceClass = new SingleInstanceClass(context);
+        }
+        return sInstanceClass;
+    }
+}
+在开发中单例经常需要持有Context的实例，如上面代码，如果一个Activity调用getInstance(Context context)方法，则在Activity销毁时SingleInstanceClass仍然持有Activity的引用，导致Activity无法回收利用，出现内存泄漏。
+
+解决办法：1、保证Context的生命周期与应用的生命周期一致
+     public SingleInstanceClass(Context context) {
+        mContext = context.getApplicationContext();
+    }
+解决办法：2、使用弱引用代替强引用持有实例（弱引用的使用）
+    public SingleInstanceClass(Context context) {
+        //弱引用
+        WeakReference<Context> weakReference = new WeakReference<>(context);
+        mContext = weakReference.get();
+    }
+（2）错误使用静态变量
+
+使用静态方法是十分方便的，但是创建的对象建议不要全局化，全局话变量必须加上static，全局化的变量或者对象会造成内存泄漏。
+
+2.3 未移除监听
+对于监听类相关资源需要在Activity销毁时进行注销和回收，否则导致资源不回收造成内存泄漏。
+
+（1）广播监听
+
+public class LisenterActivity extends AppCompatActivity {
+    private static final String TAG = LisenterActivity.class.getSimpleName();
+    private MyReceiver mMyReceiver;
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        //1.自定义广播
+        mMyReceiver = new MyReceiver();
+        //创建过滤器，增加手势参数Action
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        //动态注册广播
+        registerReceiver(mMyReceiver, filter);
+    }
+
+    //自定义广播接收类
+    private class MyReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //对接收到的广播进行处理，intent里面包含数据
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        //正例
+        //对于监听类相关资源需要在Activity销毁时进行注销和回收，否则导致资源不回收造成内存泄漏。
+        //解除广播
+        unregisterReceiver(mMyReceiver);
+        super.onDestroy();
+    }
+}
+在Activity销毁的时候unregisterReceiver()解除广播，回收资源。
+
+（2）add监听(addOnWindowFocusChangeListener)
+
+public class ListenerActivity extends AppCompatActivity implements ViewTreeObserver.OnWindowFocusChangeListener{
+    private static final String TAG = ListenerActivity.class.getSimpleName();
+    private TextView mTextView;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mTextView = new TextView(this);
+        //监听执行完回收对象，不用考虑内存泄漏
+        //textView.setOnClickListener(null);
+
+        //add监听，放到集合里面，需要考虑内存泄漏
+        mTextView.getViewTreeObserver().addOnWindowFocusChangeListener(this);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        //监听View的加载，加载处理计算他的宽高
+    }
+
+   @Override
+    protected void onDestroy() {
+        //正例
+        //对于监听类相关资源需要在Activity销毁时进行注销和回收，否则导致资源不回收造成内存泄漏。
+
+        //解除控件监听
+        mTextView.getViewTreeObserver().removeOnWindowFocusChangeListener(this);
+        super.onDestroy();
+    }
+}
+在Activity销毁的时候解除监听，回收资源。
+
+2.4 相关资源未关闭
+对于资源的使用，在Activity销毁或者不需要的场景时，需要手动关闭/注销这些资源，否则这些资源不会被回收。
+
+（1）动画相关资源
+
+在动画结束或不需要动画的时候或在Activity销毁的时候结束并回收动画。
+
+ private void startAnimation() {
+        mAnimator = ObjectAnimator.ofFloat(mTextView, "rotationY", 0, 360);
+        mAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        mAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+            }
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                //动画结束时，清除控件动画并退出动画
+                mTextView.clearAnimation();
+                mAnimator.cancel();
+            }
+            @Override
+            public void onAnimationCancel(Animator animation) {
+            }
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        //清除控件动画并退出动画
+        mTextView.clearAnimation();
+        mAnimator.cancel();
+        super.onDestroy();
+    }
+动画中有无限循环的动画，动画播放时，Activity会被View所持有，从而导致Activity无法被释放，需要cancel()退出动画。
+
+（2）IO流相关类
+
+在使用IO流，File文件类或者Sqlite、Cursor等资源时要及时关闭，这些资源在读写操作时一般都行了缓冲，如果不及时关闭，这些缓冲对象就会一直被占用得不到释放，以致内存泄漏，所以在在它们不需要使用时，及时关闭，缓冲释放资源，避免内存泄漏。
+
+  //IO流使用完毕后及时关闭
+    InputStream stream = null;
+        try {
+        stream = new FileInputStream("name");
+    } catch (FileNotFoundException e) {
+        e.printStackTrace();
+    } finally {
+        try {
+            //关闭流
+            stream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+注意：关闭语句必须要finally中关闭，否则可能因为异常未关闭导致资源，导致Activity泄漏。
+
+（3）游标cursor
+
+//查询数据库，返回Cursor
+Cursor cursor = db.query(SQLiteHelper.TABLE_NAME, COLUMNS, key + " = ?", new String[]{values}, null, null, null);
+cursor.close();
+对于数据库游标Cursor，使用完毕后关闭。
+
+（4）Bitmap类
+
+ //Bitmap 使用完毕后回收
+Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+bitmap.recycle();
+bitmap = null;
+对于图片资源Bitmap，Andorid分配给图片的资源只有8M，如果1个Bitmap对象占用资源较多时，当不再使用时应该recycle()回收对象像素所占用的内存，最后赋值为Null。
+
+（5）集合类
+
+项目中我们常常把一些对象加入到集合中，如果不需要这些对象时，如果不把他们从集合中清理掉，那么GC就无法回收该对象。如果集合声明为静态的话，泄漏就更严重了，所以在不需要使用的时候将对象从集合中移除。
+
+ ArrayList<String> arrayList = new ArrayList();
+        for (int i = 0; i < 10; i++) {
+        String s = new String();
+        arrayList.add(s);
+        s = null;
+    }
+
+    //虽然释放了对象本身：s=null；但是集合list仍然引用这该对象，导致GC无法回收该对象
+    arrayList.clear();
+    arrayList = null;
+内存优化总结：
+
+类型	具体事例	描述	解决方法
+内存优化	非静态内部类引用Activity的泄漏	1.非静态内部类创建静态实例	非静态内部类创建静态实例会导致内存泄漏
+1、将非静态内部类设置为静态内部类
+
+2、将外部类抽取出来封装成一个单例
+
+2.AsyncTask的使用	在AsyncTask处理耗时操作时，没操作完就将Activity退出，此时AsyncTask已然持有Activity的引用，导致Activity无法被回收处理。	在Activity销毁时也取消AsyncTask相关的任务AsyncTask.cancel()
+3.Thread类使用	Thread类为非静态内部类，默认持有外部类的引用
+1、将线程类Thread修改为静态内部类
+
+2、外部类结束时，强制结束线程
+
+     Thread.stop();
+
+4.Handler造成的内存泄漏	通过内部类创建的mHandler对象，会隐式持有Activity的引用，mHander装入到Message中，如果消息未处理完，间接持有外部类引用	1、当外部类结束时，清空Handler内消息队列；
+ mHandler.removeCallbacksAndMessages(null)
+2、将匿名内部类改为静态内部类，并对上下文或者Activity使用弱引用。
+static关键字修饰的成员变量	5.静态变量的单例模式	非静态单例的静态变量持有Context实例，Context生命周期小于单例的声明周期，造成内存泄漏
+1、保证Context的生命周期与应用的生命周期一致
+mContext = context.getApplicationContext()；
+
+2、使用弱引用代替强引用持有实例
+WeakReference<Context> weak = new WeakReference<>(context);
+
+6.错误使用静态变量	静态方法创建的对象如果全局化会造成内存泄漏	在全局化的对象加静态修饰static
+未移除监听
+ 	7.广播接收者监听	广播类需要unregister解除，否则会造成内存泄漏	在Activity销毁时进行解除广播，unregisterReceiver(mMyReceiver)
+8.addOnWindowFocusChangeListener	add监听，放到集合里面的，需要考虑内存泄漏
+在Activity销毁时进行解除监听，removeOnWindowFocusChangeListener(this)
+
+相关资源未关闭	9.动画相关资源	对于资源的使用，在Activity销毁或者不需要的场景时，需要手动关闭/注销这些资源，否则这些资源不会被回收，从而导致内存泄漏
+在动画结束或者不需要动画或者Activity销毁时结束动画 .
+
+animation.cancel();  view.clearAnimation()
+
+10.IO流相关类
+在IO相关类使用完毕后关闭(在finally中关闭)。
+
+stream.close()
+
+11.游标cursor
+对于数据库游标Cursor，使用完毕后关闭
+
+cursor.close()
+
+12.Bitmap类
+Bitmap对象占用资源较多时,不再使用时应该recycle()回收
+
+bitmap.recycle(); bitmap = null
+
+13.集合类
+将不需要使用的对象从集合中清理掉arrayList.clear(); arrayList = null
+
+三、布局优化
+3.1 Android组件是如何处理UI组件的更新操作的
+Android中通常把布局文件写在XML中，Android需要把XML布局文件转换成GPU能够识别并绘制的对象，CPU负责把UI组件计算成Polygons，Texture纹理，然后交给GPU进行栅格化渲染，最后硬件将信息绘制到屏幕上。
+
+为了使APP流畅，我们需要在每一帧16ms内完成所有的CPU与GPU的计算、绘制、渲染等操作，也就是帧率为60fps，为什么要帧率为60fps呢？因为人眼与大脑之间的协作无法感知超过60fps的画面更新，开发APP的性能目标就是保持60fps，这意味着每一帧只有16ms(1000/60)的时间来处理所有任务。
+
+但是我们遇到很多帧率小于刷新频率，这种情况下，某些帧显示的画面内容就会与上一帧的相同，帧率如果从高于60fps突然掉落到低于60fps就会发生卡顿不顺滑的情况。这也是用户感受卡顿的原因所在。
+
+在View第一次被渲染时，DisplayList就会被构建，View显示到屏幕上时，会执行GPU的指令来进行渲染，如果后续还有移动位置等操作时再次渲染这个View时，仅仅额外执行一次渲染指令就可以了。但是如果修改了View中某些可见组件，DisplayList就无法再次使用，需要重新构建再渲染。任何View中的绘制内容发生变化时，都会执行DisplayList构建和渲染，更新到屏幕等一系列操作，这个流程表现的性能取决于View的复杂程度，View的状态变化以及View渲染管道的执行力。所以我们需要尽量减少过渡绘制（OverDraw）。
+
+综上，针对页面布局的性能，层级，测量绘制时间进行优化，所以布局优化就是减少层级，减少OverDraw，性能耗费少，越简单越好。
+
+3.2 布局优化的方案
+布局优化的思想就是尽量减少布局文件的层级。布局性能的好坏直接影响Android应用中页面的响应速度，布局太过于复杂，层级嵌套太深导致绘制操作耗时，而且增加内存的消耗，优化的思路主要有以下几种方案：
+
+我们用图表总结一下：
+
+
+
+（1）选择耗费性能少的布局
+
+如果FrameLayout，LinearLayout，RelativeLayout都能实现效果的情况下，优先选择那种布局？
+
+从源码上来看FrameLayout，LinearLayout，RelativeLayout都是ViewGroup的子类，FrameLayout的代码量最少，逻辑最少，子View只和父类存在关系。LinearLayout，RelativeLayout都涉及子类的计算，这样看来FrameLayout似乎是性能最好的；LinearLayout会让子View调用一次onMeasure，如果存在weight(权重)的时候回调用两次onMeasure(会增加一倍的耗时)，RelativeLayout会让子View调用两次onMeasure。LinearLayout比RelativeLayout绘制时间更短。
+
+所以在不影响层级深度的情况下，尽量使用FrameLayout和LinearLayout，如果布局比较复杂则使用RelativeLayout。优先级：FrameLayout>LinearLayout>RelativeLayout。
+
+注意：
+
+1.如果需要用到两个LinearLayout，则使用一个RelativeLayout替换；
+2.RelativeLayout子View与RelativeLayout高度不同时，会引发效率问题，当自View复杂时，这个问题更严重，如果可以尽量使用padding代替margin；
+3.但是在约束布局未出来之前，为什么默认的是RelativeLayout呢？因为当遇到复杂的布局时，RelativeLayout相对LinearLayout能减少布局层级，减少过多父布局，在findviewbyid()查找控件上RelativeLayout比LinearLayout更省时间。
+（2）提高布局的复用性
+
+使用<incloude>来重用布局，抽取通用的公共部分让其他布局使用，让布局更清晰。通过布局的复用性，从而减少测量/绘制时间。如果布局比较复杂且行数较多也可以抽取一部分出来，使布局不那么臃肿。
+
+具体操作方法：选中你想要抽取的布局—鼠标右键—Refactor—Extract-Layout…—输入文件名
+
+activity_include.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:layout_height="match_parent">
+
+    <!--include标签抽取公共部分的布局-->
+    <include layout="@layout/include_btn"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="#9C27B0"
+        android:padding="8dp"
+        android:text="布局优化2"/>
+</LinearLayout>
+include_btn.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<!--include标签抽取公共部分的布局-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="#E91E63"
+        android:padding="8dp"
+        android:text="布局优化-include-1"/>
+</LinearLayout>
+include标签允许布局引入另一个布局，这里将一个Button抽取到一个布局中，方便相同的UI和可以复用该布局。
+
+（3）减少布局的层级
+
+使用<merge>标签引用布局，能减少布局层级，从而减少绘制时间，提高性能。merge标签作为include标签的拓展使用，主要是为了防止引用布局文件时产生多于的布局嵌套，在上面的例子中，include标签抽取的布局文件中多了一个LinearLayout的父布局，其实它是可以不存在的。下面使用merge标签进行改动：
+
+activity_include.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <!--include标签抽取公共部分的布局
+      它的布局层级：LinearLayout-> Button
+                               -> LinearLayout ->Button
+      -->
+    <include layout="@layout/include_btn"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="#9C27B0"
+        android:padding="8dp"
+        android:text="布局优化2"/>
+
+    <!--merge标签
+      它的布局层级：LinearLayout-> Button
+                               -> merge ->Button
+     -->
+    <include layout="@layout/include_merge_layout"/>
+</LinearLayout>
+include_merge_layout.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<!--merge标签-->
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center">
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="#FF9800"
+        android:padding="8dp"
+        android:text="布局优化-merge1"/>
+</merge>
+merge优化将布局include_merge_layout.xml的根标签<LinearLayout>改为<merge>，去掉了多于的无意义的<LinearLayout>这个根节点
+
+（4）减少初次绘制/测量时间
+
+通常情况我们需要在某种条件下使用某种布局通过Gone和Invisible来隐藏布局，但是界面显示的时候还是会实例化的，使用ViewStub标签可以避免内存浪费，加速渲染速度，其实ViewStub就是一个宽高都为0的View，它默认是不可见的，通过setVisibility()或者inflate()才会将目标加载出来，从而达到延迟加载的效果。<ViewStub>标签最大的有点就是你在需要的时候才会加载，使用它并不会影响UI初始化的性能。
+
+   final ViewStub viewStub = findViewById(R.id.view_stub);
+    //延迟2秒后显示viewStub布局
+        viewStub.postDelayed(new Runnable() {
+        @Override
+        public void run() {
+            //加载显示
+            viewStub.inflate();
+            //viewStub.setVisibility(View.VISIBLE);
+        }
+    }, 2000);
+activity_include.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <ViewStub
+        android:id="@+id/view_stub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout="@layout/layout_viewstub"/>
+</LinearLayout>
+layout_viewstub.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<!--ViewStub标签在需要的时候才显示布局-->
+<Button
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#3F51B5"
+    android:padding="8dp"
+    android:text="布局优化-ViewStub"/>
+这里ViewStub标签，在延迟2秒后layout_viewstub布局通过infalte()显示出来，效果如下：
+
+
+
+注意：1.ViewStub布局里面不能使用<merge>标签，否则会报错；
+          2.ViewStub的inflate()只能执行一次，显示之后就再不能使用ViewStub控制他了。
+（5）尽可能少使用wrap_content属性
+
+wrap_content属性会增加布局计算成本，在确定控件宽高的情况下可是执行控件的宽高。（由于安卓的适配性，一般都要配合wrap_content和layout_weight属性更好的适配）
+
+（6）Space(不常用)
+
+<Space>标签在布局文件中只占位置不绘制，它继承自View并复写ondraw方法，该方法为空，既没有调用父类draw方法也没有执行自己的代码，说明没有绘制操作，onMeasure方法正常调用，说明有宽高，一般用来设置间距，这个标签不常用，通常使用padding和margin即可满足需求。
+
+源码：
+
+   /**
+     * Draw nothing.
+     * @param canvas an unused parameter.
+     */
+    @Override
+    public void draw(Canvas canvas) {
+    }
+    …………
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        setMeasuredDimension(
+                getDefaultSize2(getSuggestedMinimumWidth(), widthMeasureSpec),
+                getDefaultSize2(getSuggestedMinimumHeight(), heightMeasureSpec));
+    }
+使用例子：
+
+ <Space
+        android:layout_width="match_parent"
+        android:layout_height="20dp"/>
+（7）使用ConstraintLayout
+
+从Android Stuido2.3开始官方的模板就默认使用ConstraintLayout了，ConstaintLayout主要是解决布局嵌套过多问题，以灵活的方式调整和定位小部件，具有较高的性能，完美适应屏幕，大小距离都能用比例来显示，适配性更好。ConstraintLayout允许不嵌套任何布局的情况下创建复杂布局，与RelativeLayout相似，比RelativeLayout更灵活，可以依赖兄弟容器与父控件的关系。可以参考更详细的ConstrainLayout约束布局的使用，我们来看看常用的属性：
+
+layout_constraintLeft_toLeftOf
+layout_constraintLeft_toRightOf
+layout_constraintRight_toLeftOf
+layout_constraintRight_toRightOf
+layout_constraintTop_toTopOf
+layout_constraintTop_toBottomOf
+layout_constraintBottom_toTopOf
+layout_constraintBottom_toBottomOf
+layout_constraintBaseline_toBaselineOf
+layout_constraintStart_toEndOf
+layout_constraintStart_toStartOf
+layout_constraintEnd_toStartOf
+layout_constraintEnd_toEndOf
+上面属性的用法类似RelativeLayout属性的用法，基本上都是那条边对齐那条边，以“layout_constraintLeft_toRightOf”为例，constraintLeft表示自身控件的左边，toRightOf表示在某控件的右边，toRightOf后接控件的id，总的来说就是：自身的左边位于某控件的右边，其他属性类推，这里就不一一讲解了。我们来看看使用实例：
+
+在build.gradle文件中添加依赖：
+
+implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!--layout_constraintTop_toTopOf="parent":控件的顶部位于父控件的顶部
+        layout_constraintRight_toRightOf="parent"：控件的右边位于父控件的右边
+        layout_constraintLeft_toLeftOf="parent"：控件的左边位于父控件的左边-->
+    <TextView
+        android:id="@+id/tv_constrain1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="#9C27B0"
+        android:padding="10dp"
+        android:text="ConstraintLayout1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/tv_constrain2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="#E91E63"
+        android:padding="10dp"
+        android:text="ConstraintLayout2"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/tv_constrain3"
+        app:layout_constraintTop_toBottomOf="@+id/tv_constrain1"/>
+
+    <TextView
+        android:id="@+id/tv_constrain3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="#2196F3"
+        android:padding="10dp"
+        android:text="ConstraintLayout3"
+        app:layout_constraintLeft_toRightOf="@+id/tv_constrain2"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_constrain1"/>
+
+</android.support.constraint.ConstraintLayout>
+constrain1位于容器顶部，居中显示，tv_constrain2和tv_constrain3位于tv_constrain1下面，平分位置，效果如下：
+
+
+
+四、绘制优化
+绘制性能的好坏直接影响到页面显示的速度，实际上是绘制所需要的时间，一个页面通过递归完成测量和绘制显示。绘制方面的工作主要在onDraw()中完成，目的是降低onDraw()的复杂程度和避免过渡绘制。
+
+4.1 降低onDraw()的复杂程度
+由于onDraw()可能会被频繁调用，所以降低onDraw()的负荷是重中之重。
+
+（1）不要在onDraw()中创建新的局部对象
+
+如果在onDraw()方法内创建新的局部对象，则会一瞬间产生大量的临时对象，这会占用系统过多的内存，频繁导致GC，降低系统的执行力。所以尽量不要在onDraw()方法内创建新的局部对象。
+
+（2）避免onDraw()执行大量耗时的操作
+
+onDraw()方法内执行耗时操作会抢占CPU的时间，从而导致绘制不流畅，我们应该将耗时操作放到其他函数或者多线程中执行。
+
+4.2 避免过渡绘制
+过渡绘制是指屏幕内某个像素在同一帧的时间被多次绘制，而在多层次的UI结构里面，如果不可见的UI也在绘制的话，就会导致某些像素区域被绘制多次，从而浪费大量的CPU与GPU的资源。
+
+（1）移除默认的windows背景
+
+一般情况主体背景都是自定义设置的，默认的windows背景用不上，如果不手动删除则所有界面都会重绘多一次。可以在主题Theme将背景设置为null或者全透明：
+
+<resources>
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
+        <!--将背景主题设置为null或者设置全透明-->
+        <item name="android:windowBackground">@null</item>
+        <!--<item name="android:windowBackground">#00000000</item>-->
+    </style>
+</resources>
+或者在onCreate()方法中代码设置：
+
+ @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        //将背景主题设置为null或者设置全透明
+        getWindow().setBackgroundDrawable(null);
+        getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+    }
+（2）移除控件中不必要的背景
+
+如果子控件的背景颜色与父控件的背景颜色一致，则子控件可以不用设置背景颜色，比如父控件TextView背景色为白色，父控件Linearlayout的背景色为白色，父控件在已经设置背景色的情况下，子控件可以不用再设置背景色了。
+
+（3）自定义控件View优化：使用clipRect() 、 quickReject()
+
+clipRect()：       表示设置裁剪区域，在该区域内才会绘制 ；
+quickReject()： 表示判断某个矩形相交，相交区域不绘制。
+合理利用clipRect()和quickReject()，减少不可见区域不必要的绘制操作。
+
+手机中自带有查看过渡绘制的工具，那么如何利用该工具查看过渡绘制的情况呢？
+
+手机设置--开发者选项--调试GPU过渡绘制--显示过渡绘制区域
+
+如下左图为显示过渡绘制效果，下右图为过渡绘制的颜色所表示的值。
+
+
+
+上面颜色值==原色：没有过渡绘制；紫色：1次多度绘制；绿色：2次过渡绘制；粉色：3次过渡绘制；红色：4次过渡绘制或者更多。
+
+尽可能将次数控制在2次以下，避免粉色和红色，3次以上的不要超过屏幕的1/4。其实很多过渡绘制是难以避免的，我们只能仅可能的避免一些不必要的过渡绘制。
+
+绘制优化小结：
+
+类型	方案	具体实现
+绘制优化
+1.降低onDraw()的复杂程度
+
+不要在onDraw()中创建新的局部对象
+
+避免创建新的对象
+避免onDraw()执行大量耗时的操作
+
+避免耗时操作
+2.避免过渡绘制
+
+移除默认的windows背景
+
+Theme将背景设置为null或者全透明：
+
+<item name="android:windowBackground">@null</item>
+<item name="android:windowBackground">#00000000</item>
+
+或在onCreate()中设置：
+
+ getWindow().setBackgroundDrawable(null);   getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+移除控件中不必要的背景
+
+相同颜色子控件的背景不设置
+自定义控件View优化：使用clipRect() 、 quickReject()
+
+只绘制需要绘制的区域
+五、图片优化
+图片优化一直是Android焦点的问题，图片一直是APP的内存消耗大户，一张图片从几KB到几M不等，有时候一张图片就会吃掉我们吃紧的内存，稍有使用不当也会导致OOM。图片优化的方式大概可以分为以下几类：更换图片格式，质量压缩，采样率压缩，缩放压缩等。
+
+5.1 图片质量压缩
+图片压缩的原理是通过保持像素的前提下，改变位深和透明度（即通过算法抠掉了图片中某些点附近相近的元素），达到降低质量压缩图片大小的目的。
+
+注意：它其实只能对File的影响，对加载这个图片出来的Bitmap内存是无法节省的，还是那么大，因为Bitmap在内存中的大小是根据“width*height*一个像素所占用的字节数”来计算的，对于质量压缩，并不会改变图片真实的像素（像素大小不会变），这种适合于图片压缩上传到服务器或者保存到本地的情况。由于PNG是无损压缩，所以quality设置无效。
+
+  /**
+     * 质量压缩
+     * 设置Bitmap options属性，降低图片质量，图片像素不会减少
+     *
+     * @param bitmap 需要压缩的Bitmap图片对象
+     * @param file   压缩后图片保存的位置
+     */
+    private void qualityCompress(Bitmap bitmap, File file) {
+        int quality = 80;//0-100,数值越小表示质量越低，100表示不压缩
+        Log.e(TAG, "质量压缩前：" + getBitmapSize(bitmap));
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        //把压缩后的数据放到bos中
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, bos);//Bitmap.CompressFormat.PNG表示图片压缩的格式
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(bos.toByteArray());
+            Log.e(TAG, "质量压缩后：" + fos.getChannel().size());
+            fos.flush();
+            fos.close();
+            bos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+将图片压缩后(具体图片效果请看源码，源码地址在文章最后给出)，测试数据如下：
+
+
+
+5.2 采样率压缩
+采样率压缩原理就是重设图片的采样率，降低图片像素，因为采样率是整数，所以不能很好保证图片的质量，比如如果我们需要在2和3之间的采样率，2就大了，3则质量明显下降，无法满足。
+
+设置的inSampleSize会导致压缩图片的宽高都为1/inSampleSize，整体大小为原始图片的inSampleSize分之一。
+
+    /**
+     * 采样率压缩
+     *
+     * @param path 文件路径
+     * @param file 压缩后图片保存的位置
+     */
+    private void samplingRateCompress(String path, File file) {
+        //数值越高，像素越低
+        int inSampleSize = 3;
+        //设置采样率
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = inSampleSize;
+        options.inJustDecodeBounds = false;// true时不会真正加载图片，而是得到图片的宽高信息
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.woman, options);
+//        Bitmap bitmap = BitmapFactory.decodeResource(path, options);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        //把压缩后的数据放到bos中
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(bos.toByteArray());
+            Log.e(TAG, "质量压缩后：" + fos.getChannel().size());
+            fos.close();
+            bos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+(具体图片效果请看源码，源码地址在文章最后给出)，打印数据如下：
+
+
+
+5.3 尺寸压缩
+尺寸压缩的原理是通过减少单位尺寸的像素值，真正意义上的降低像素，可用于缓存缩略图。
+
+    /**
+     * 尺寸压缩：通过缩放图片像素来减少图片占用内存大小
+     *
+     * @param bitmap 需要压缩的Bitmap图片对象
+     * @param file   压缩后图片保存的位置
+     */
+    private void sizeCompress(Bitmap bitmap, File file) {
+        //压缩尺寸倍数，值越大，尺寸越小
+        int ratio = 3;
+        //压缩Bitmap得到对应的尺寸
+        Bitmap result = Bitmap.createBitmap(bitmap.getWidth() / ratio, bitmap.getHeight() / ratio, Bitmap.Config.ARGB_8888);
+        //创建画笔
+        Canvas canvas = new Canvas(result);
+        //创建矩形
+        RectF rectF = new RectF(0, 0, bitmap.getWidth() / ratio, bitmap.getHeight() / ratio);
+        //将原图画在缩放之后的矩形之上
+        canvas.drawBitmap(result, null, rectF, null);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        //把压缩后的数据放到bos中
+        result.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+
+        try {
+            //创建文件输出流
+            FileOutputStream fos = new FileOutputStream(file);
+            //将bos中的数据写入到fos中
+            fos.write(bos.toByteArray());
+            Log.e(TAG, "尺寸压缩后：" + fos.getChannel().size());
+            fos.close();
+            bos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+(具体图片效果请看源码，源码地址在文章最后给出)，打印数据如下：
+
+
+
+5.4 使用矩阵
+大图小用用采样，小图大用用矩阵，还是前面模糊图片的例子，我们不是取用了采样么，内存是小了，但是图片的尺寸也小了，我要用Canvas绘制这张图怎么办，当然是用矩阵啦。
+
+ Matrix matrix = new Matrix();
+ matrix.setScale(2, 2, 0f, 0f);
+ canvas.concat(matrix);
+ canvas.drawBitmap(bitmap, 0, 0, paint);
+ //或者
+ //canvas.drawBitmap(bitmap, matrix, paint);
+这个图就是放大以后的效果了，不过占用的内存仍然是我们采样出来的大小，把图片放到ImageView中：
+
+matrix.postScale(2, 2, 0, 0);
+imageView.setScaleType(ImageView.ScaleType.MATRIX);
+imageView.setImageMatrix(matrix);
+imageView.setImageBitmap(bitmap);
+效果如下：
+
+
+
+5.5 图片格式
+Android目前的格式有三种：PNG、JPEG、WEBP，分别来了解一下：
+
+（1）PNG：无损压缩图片方式，支持Alpha通道，切图素材大多用这种格式；
+（2）JPEG：有损压缩图片格式，不支持背景透明和多帧动画，使用于色彩丰富的图片压缩，不适合于logo；
+（3）WEBP：支持有损和无损压缩，支持完整的透明通道，也支持多帧动画，是一种比较理想的图片格式；从谷歌官网来看，无损webp平均比png小26%，有损jpeg平均比webp少24%-35%，无损webp支持Alpha通道，有损webp在一定条件下也支持。采用webp在保持图片清晰情况下，可以优先减少磁盘空间大小；
+（4）使用.9图：点九图实际上仍然是png格式图片，它是针对Andorid平台特殊的图片格式，体积小，拉伸变形，能指定位置拉伸或者填充，能很好的适配机型。
+
+5.6 图片像素格式
+不同图片的解码方式对应的内存占用大小也会有差异，ARGB主要作用是描述色彩颜色，所有颜色都有红绿蓝组成，所以也被成为三原色，它的含义如下：
+
+A：alpha，表示透明度；
+R：red，表示红色；
+G：green，表示绿色；
+B：blue，表示蓝色。
+类型	含义	色彩组成	内存	使用情况
+ARGB_4444	16位ARGB位图	颜色+透明度	每个像素占4位，ARGB各占4位；
+由4个四位组成，共16位；
+4+4+4+4 = 16 = 2字节	尽管内存只占ARGB_8888的一半，不过已经被官方废弃。
+ARGB_8888	32位ARGB位图	颜色+透明度	每个像素占8位，ARGB各占8位；
+由4个八位组成，共32位；
+8+8+8+8 = 32 = 4字节	最常用
+RGB_565	16位RGB位图	颜色	每个像素分别占：A=5,B=6,B=5;
+5+6+5 = 16 = 2字节	资源优化设置无处不在，如果不需要Alpha通道的，特别是.JPG格式的，这个比较理想
+ALPHA_8	8位Alpha位图	透明度	仅有一个8位的像素组成，A = 8；
+8 位 = 1字节；	比较少用到
+位图位数越高，代表可存储颜色信息就越多，图像越逼真，由上面的数据可知，ARGB_8888最占内存，一个像素占四个字节。
+
+5.7 使用图片缓存库
+比较常用的图片开源库是Glide和Picasso，我们来简单比较一下他们的优劣：
+
+（1）Glide和Picasso的with()方法传入的参数不同
+
+Glide：不光能接收Context，还能接受Activity和Fragment，Context会在它们中获取；能根据声明周期更好管理图片。
+Picasso：只能接受Context。
+（2）加载后图片质量不同
+
+Glide采用的是RGB565，Picasso采用的是RGB8888
+加载出来的图片Picasso的固然是比glide的清晰，但是内存开销也比较大
+（3）缓存策略
+
+Picasso加载的是原始尺寸的图片，Glide加载的是和ImageView相同尺寸的图片
+Picasso只缓存一种全尺寸的图片，而Glide会为每种大小的ImageView缓存一次，所以Glide显示图片会更快，Picasso显示图片前需要调整尺寸，所以显示比较慢，但是Glide需要更大的缓存控件来缓存各种尺寸的图片。
+（4）GIF图（内存消耗多大，谨慎使用）
+
+能显示GIF图是Glide的杀手锏，Picasso不能显示GIF图。除了gif动画之外，Glide还可以将任何的本地视频解码成一张静态图片。
+Glide的简单使用：
+
+AndroidManifest.xml添加权限：
+
+<uses-permission android:name="android.permission.INTERNET" />
+build.gradle文件添加依赖：
+
+implementation 'com.github.bumptech.glide:glide:4.8.0'
+implementation 'com.github.bumptech.glide:compiler:4.8.0'
+这里简单加载一下网络图片和GIF图：
+
+//Glide大部分的设置选项都可以通applyDefaultRequestOptions添加RequestOptions到应用程序中
+RequestOptions options = new RequestOptions();
+        options.placeholder(R.mipmap.ic_launcher)//加载成功前的占位图
+                //错误站位图
+               .error(R.mipmap.woman)
+                //指定图片尺寸
+               .override(400, 400)
+                //执行缩放类型，fitCenter()表示等比例缩放，宽或者高等于ImageView的宽或者高；
+                //centerCrop()：等比例缩放图片，知道宽高大于ImageView宽高，然后截取中间的显示，circleCrop()：缩放类型为圆形
+               .fitCenter()
+                //缓存策略：DiskCacheStrategy.ALL：缓存所以版本的图片；DiskCacheStrategy.NONE：跳过磁盘缓存；
+                // DiskCacheStrategy.DATA：只缓存原来分辨率的图片；DiskCacheStrategy.RESOURCE：只缓存最终的图片
+               .diskCacheStrategy(DiskCacheStrategy.ALL)
+                //跳过内存缓存
+               .skipMemoryCache(true);
+
+ Glide.with(GlidePicassoActivity.this)//传入上下文
+            //加载图片地址
+            .load("http://inthecheesefactory.com/uploads/source/glidepicasso/cover.jpg")
+            //设置图片的控件
+            .into(mIv_glide);
+ Glide.with(GlidePicassoActivity.this)
+            .load(R.drawable.timg)
+            .into(mIv_glide2);
+Picsso的简单使用：
+
+build.gradle文件添加依赖：
+
+implementation 'com.squareup.picasso:picasso:2.5.2'
+这里简单加载一下网络图片和GIF图：其他用法可以参考Picasso的详细使用
+
+Picasso.with(GlidePicassoActivity.this)//传入上下文
+            //加载图片地址
+            .load("http://inthecheesefactory.com/uploads/source/glidepicasso/cover.jpg")
+            //设置图片的控件
+            .into(mIv_picasso);
+Picasso.with(GlidePicassoActivity.this)
+            .load(R.drawable.timg)
+            .into(mIv_picasso2);
+效果如下：
+
+
+
+总的来说，Glide和Picasso都是非常优秀的图片开源库，Glide加载图片以及磁盘缓存方式都由于Picasso，速度更快，能较少OOM的发生，GIF是Glide的杀手锏，不过Picasso的图片质量更高。
+
+图片优化总结：
+
+类型	原理	方案
+图片优化	1.质量压缩	通过保持像素的前提下，改变位深和透明度	设置图片质量参数，改变图片质量bitmap.compress(Bitmap.CompressFormat.JPEG, quality, bos);
+2.采样率压缩	重设图片的采样率，降低图片像素	设置采样率
+options.inSampleSize = 5;
+3.尺寸压缩	减少单位尺寸的像素值，真正意义上的降低像素
+通过缩放图片像素
+
+ Bitmap result = Bitmap.createBitmap(bitmap.getWidth() / ratio, bitmap.getHeight() / ratio, ARGB_8888);
+RectF rectF = new RectF(0, 0, bitmap.getWidth() / ratio, bitmap.getHeight() / ratio);
+
+4.使用矩阵	大图小用用采样，小图大用用矩阵	 设置矩阵：matrix.setScale(2, 2, 0f, 0f);
+ canvas.concat(matrix);
+5.图片格式	不同图片格式质量不一样	采用适当的图片格式（PNG,JPEG,WEBP,.9图）
+6.图片像素格式	不同图片的解码方式对应的内存占用大小也会有差异	采用适当的像素格式（ARGB_8888，RGB_,565）
+7.使用图片缓存库	Glide和Picasso作为优秀的图片开源库，做了相应的图片优化处理	Glide：更快，缓存策略更好，支持GIF
+Picasso：图片质量更高，不支持GIF
+六、apk大小优化
+6.1 图片资源压缩
+通常项目给出的图片大小比较大，如果一个APP中的图片比较多，那么这也增加了apk的体积，我们可以使用工具可以对图片进行适当的压缩，减少图片大小。https://tinypng.com，这个网站能很好的压缩大部分的体积，并且图片质量影响不大。注意：原图大小不能超多5M。
+
+
+
+从上面的图片来看，256.6KB压缩成了48.5KB，体积减少了81%，我们来比较一下图片：左图为原图，右图为压缩后的图：
+
+
+
+6.2 去除无效资源
+当一个项目维护过久的时候就会产生多于的文件，我们并没有使用到其中，这时候可以使用lint工具去除无效的资源和代码：
+
+在Android studio的操作步骤：
+
+Anlyze -->Run Inspection By Name --> 输入关键词：unused resources --> 选择搜索的范围：Inspection spoce -->点击OK
+
+步骤如下图：
+
+1.Anlyze -->Run Inspection By Name
+
+
+
+2.输入关键词：unused resources
+
+
+3.选择搜索的范围：Inspection spoce,这里选择Module:APP
+
+
+
+4.最后发现该项目中有一个XML文件和一个图片未使用，如下图：
+
+
+
+6.3 build.gradle三步Apk瘦身
+我们可以在build.gradle文件中过滤掉没使用的.jar包，资源，代码等，指定语言能有效减少APK包的大小。
+
+
+
+（1）minifyEnabled针对class.dex(jar,class进行)优化瘦身
+
+        buildTypes {
+            release {
+                minifyEnabled true
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            }
+        }
+他能过滤掉整个项目未使用的jar包，开启混淆功能，比如FileUtil.getMd5File(path)->a.b(c)
+
+（2）shrinkResources瘦身res目录
+
+        buildTypes {
+            release {
+                shrinkResources true
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            }
+        }
+主要是对res目录下面未引用的资源进行特殊处理，将图片替换成1*1像素，必须在（1）的前提下，即开启：minifyEnabled true。
+
+（3）语言的指定
+
+defaultConfig {
+        applicationId "com.example.androidoptimizedemo"
+        minSdkVersion 18
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+
+        resConfig("zh")
+    }
+在defaultConfig配置中加入： resConfig("zh")，在en基础再指定一个语言包 zh  支持 中文设置显示  values-zh 其它全显示成en，跟values 有关系，国际values-xx。
+
+例子显示，我在项目中加入了没有使用到的一部分jar包和图片，按照上面的步骤在build.gradle文件中加入相关代码：
+
+
+
+我们来看看APK的大小比较，未优化前APK大小为3363KB，优化后的APK大小为1741KB。（这里打包的是debug版，对应的外标签是debug而不是release ）
+
+七、多线程优化
+在项目中大量的线程创建和销毁很容易导致GC频繁的执行，从而发生内存抖动的现象，一旦内存抖动对于移动端最大的影响就是页面卡顿。线程的创建和销毁都是需要时间的，当有大量的线程创建和销毁时，那么这些时间的消耗则比较明显，将导致性能上缺失。详细可参考深入理解Android线程池。
+
+那么我们可以使用线程池来解决上面的问题，重用线程池中的线程，避免了频繁的线程创建和销毁带来的性能消耗，有效控制线程的最大并发数量，防止线程多大抢占资源导致系统阻塞，同时可以对线程进行一定的管理。
+
+ThreadPoolExecutor有多个构造方法和参数，这里介绍比较常用的构造方法：
+
+public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
+                              long keepAliveTime,
+                              TimeUnit unit,
+                              BlockingQueue<Runnable> workQueue)
+corePoolSize：           线程的核心线程数，默认情况，核心线程数一直存活，如果设置超时就会停止；
+maximumPoolSize：  线程池所能容纳的最大线程数，当超多这个数值，后续的任务就会被阻塞；
+keepAliveTime：        非核心线程闲置时超时的时长，超过这个时长，非核心线程就会被回收，如果设置allowCoreThreadTimeOut = true，同样可以作用于核心线程数；
+unit：                          指定keepAliveTime的时间单位，这是一个枚举，还有毫秒，秒，分钟等；
+workQueue：             线程池中的任务队列，通过线程池的execute方法提交的Runnable对象会被存储到这参数中。
+线程池的执行流程遵循下面的原则：
+
+1.如果线程池中的线程数未达到核心线程数，就会开启一个核心线程去执行任务；
+2.如果线程池中的线程数已经达到核心线程数，而且任务队列workQueue未满，则将任务添加到workQueue任务队列中；
+3.如果线程池中的线程数已经达到核心线程数但未超过最大线程数，而且任务队列workQueue已满，则将开启非核心线程来执行任务；
+4.如果线程池中的线程数已经超过最大线程数，那么拒绝执行该任务，采取饱和策略，抛出RejectedExecutionException异常。
+
+   //核心数为3个，最大线程数为10个，保活时间为2秒,任务队列最大为4个
+    ThreadPoolExecutor executor = new ThreadPoolExecutor(3, 10,
+            2, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(4));
+    //手动创建十个请求，线程池执行
+        for (int i = 0; i < 10; i++) {
+    final int index = i;
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Log.e(TAG, "线程：" + Thread.currentThread().getName() + ",正在执行第" + index + "个任务");
+                    Thread.currentThread().sleep(3000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        //线程池执行请求
+        executor.execute(runnable);
+    }
+这里简单模拟调试了线程池的使用，核心线程数为3个，最大线程数为10个，非核心线程保活时间为2秒，任务队列最大数为4个，创建10个任务请求，首先打印出0,1,2，说明核心线程添加了三个任务，然后3,4,5,6四个任务添加到workQueue任务队列中，这时任务队列已满，剩下的7,8,9三个任务，则会开启非核心线程执行，所以7,8,9比3,4,5,6先打印出来，任务队列的任务会等着，当有核心线程空闲后再执行任务队列的。打印log如下：
+
+
+
+八、列表优化
+列表优化有多种多样的策略，在项目中主要做的优化是
+
+1.item复用，使用ViewHolder，重用ConvertView；
+2.分页加载，数据太多是不能一次性加载出来的，通过分页加载；
+3.使用缓存，网络访问就算再快也是需要时间的会有一定的延迟，因为访问网络是异步处理的，如果网络加载的数据使用了二级缓存处理，第一级是内存缓存，第二级是磁盘缓存，列表加载数据时先从内存中找，没有找到再去磁盘中找，最后找不到就去请求网络。
+列表item的复用是通用的解决方案，分页加载和缓存是针对业务的个性化解决方案。另外列表中尽量避免使用线程，因为线程的周期是不可控的，使用的图片尽量经过压缩处理，bitmap使用完后recycle()回收等等。
+
+一些其他优化建议：
+
+避免创建过多对象；
+不要过多使用枚举，枚举占用的内存空间要比整型的大；
+常量请使用static final来修饰；
+使用一些Android特有的数据结构，比如SparseArray和Pair等，它们都具有更好的性能；
+适当使用软引用和弱引用；
+采用内存缓存接磁盘缓存；
+尽量采用静态内部类，这样可以避免潜在的由于内部类而导致的内存泄露。
+
+
+至此，本文结束！
